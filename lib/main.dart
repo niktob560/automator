@@ -517,8 +517,8 @@ class _IconTextWidget extends StatelessWidget {
         Text(text,
             style: TextStyle(
               color:
-                  textColor != null ? textColor : Theme.of(context).focusColor,
-              fontSize: textSize != null ? textSize : 24,
+                  textColor != null ? textColor : Colors.white,
+              fontSize: (textSize != null ? textSize : 24) * 1.0,
             ))
       ],
     );
@@ -756,12 +756,19 @@ class _SortingStatefulWidgetState extends State<_SortingStatefulWidget> {
     var id = (await _record).id;
     switch(newState) {
       case stateArchiveDone:
-        url = url + "archive/make_archive";
-        print("ARCHIVE");
+        url = url + "archive/make_archive?id=$id";
+        break;
+      case stateNotesDone:
+        url = url + "notes/make_note?id=$id";
+        break;
+      case stateDone:
+        url = url + "done/make_done?id=$id";
+        break;
+      case stateCurrentTaskDone:
+        url = url + "current/make_current?id=$id";
         break;
     }
-    url = HOST + "/api" + url + "?id=$id";
-    print("full url: $url");
+    url = HOST + "/api" + url;
     try {
       var resp = await http.patch(url);
       print(resp);
@@ -771,8 +778,15 @@ class _SortingStatefulWidgetState extends State<_SortingStatefulWidget> {
       }
     }
     catch (e) {
-      _isFinishing = false;
+      setState(() {
+        _isFinishing = false;
+      });
       print("Failed to send! $e");
+      final snackBar = SnackBar(
+        content: Text("Failed to send request"),
+        behavior: SnackBarBehavior.floating,
+      );
+      Scaffold.of(context).showSnackBar(snackBar);
       return;
     }
     setState(() {
