@@ -8,9 +8,9 @@ import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:morpheus/morpheus.dart';
 
-final String HOST = 'http://192.168.1.66:8000';
+// final String HOST = 'http://192.168.1.66:8000';
 
-//final String HOST = 'https://gtd-nobodyhomie.ddns.net';
+final String HOST = 'https://gtd-nobodyhomie.ddns.net';
 
 void main() => runApp(MyApp());
 
@@ -766,6 +766,9 @@ class _SortingStatefulWidgetState extends State<_SortingStatefulWidget> {
         break;
       case stateCurrentTaskDone:
         url = url + "current/make_current?id=$id";
+        break;
+      case stateLaterDone:
+        url = url + "later/make_later?id=$id";
         break;
     }
     url = HOST + "/api" + url;
