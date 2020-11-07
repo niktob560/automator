@@ -1,0 +1,242 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'day_night_gradients.dart';
+
+final DateFormat  serverDateFormat = DateFormat("yyyy-MM-ddTHH:mm:ssZ"),
+                  userDateTimeFormat = DateFormat("dd.MM.yyyy HH:mm"),
+                  userDateFormat = DateFormat("dd.MM.yyyy");
+
+class IconTextWidget extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final Color iconColor;
+  final Color textColor;
+  final int textSize;
+
+  IconTextWidget(this.icon, this.text,
+      {Key key, this.iconColor, this.textColor, this.textSize})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(
+          icon,
+          size: MediaQuery.of(context).size.width * 0.8,
+          color: iconColor != null ? iconColor : Theme.of(context).focusColor,
+        ),
+        Text(text,
+            style: TextStyle(
+              color:
+              textColor != null ? textColor : Colors.white,
+              fontSize: (textSize != null ? textSize : 24) * 1.0,
+            ))
+      ],
+    );
+  }
+}
+
+class YesNoStatelessWidget extends StatelessWidget {
+  Function yesFunction = () {}, noFunction = () {}, backFunction;
+  String question = '', yesText = 'Yes', noText = 'No', backText = 'Back';
+
+  YesNoStatelessWidget(
+      {Key key,
+        this.yesFunction,
+        this.noFunction,
+        this.question,
+        this.backFunction,
+        this.yesText,
+        this.noText,
+        this.backText})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(
+          height: 32,
+        ),
+        Text(
+          question,
+          style: TextStyle(color: Colors.white, fontSize: 42),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(right: 32, top: 32),
+                  child: RaisedButton(
+                    child: Text(
+                      noText != null ? noText : 'No',
+                      style: TextStyle(color: Colors.white, fontSize: 24),
+                    ),
+                    color: Theme.of(context).accentColor,
+                    onPressed: noFunction,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                    padding: EdgeInsets.only(left: 32, top: 32),
+                    child: RaisedButton(
+                      child: Text(
+                        yesText != null ? yesText : 'Yes',
+                        style: TextStyle(color: Colors.white, fontSize: 24),
+                      ),
+                      color: Theme.of(context).accentColor,
+                      onPressed: yesFunction,
+                    )),
+              )
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 64,
+        ),
+        backFunction != null
+            ? Container(
+          width: double.infinity,
+          child: RaisedButton(
+            child: Text(
+              backText != null ? backText : 'Back',
+              style: TextStyle(color: Colors.white),
+            ),
+            color: Theme.of(context).accentColor,
+            onPressed: backFunction,
+          ),
+        )
+            : Container()
+      ],
+    );
+  }
+}
+
+class DatePickerStatefulWidget extends StatefulWidget {
+  final String initialText;
+
+  DatePickerStatefulWidget(this.initialText, {Key key}) : super(key: key);
+
+  @override
+  DatePickerStatefulWidgetState createState() =>
+      DatePickerStatefulWidgetState(initialText);
+}
+
+class DatePickerStatefulWidgetState extends State<DatePickerStatefulWidget> {
+  final String initialText;
+  DateTime dateTime;
+
+  DatePickerStatefulWidgetState(this.initialText);
+
+  @override
+  Widget build(BuildContext context) {
+    return RaisedButton(
+        color: Theme.of(context).accentColor,
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Text(
+            initialText +
+                (dateTime != null
+                    ? (':\n' + userDateFormat.format(dateTime))
+                    : ''),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        onPressed: () async {
+          DateTime d = await showDatePicker(
+              context: context,
+              initialDate: dateTime == null ? DateTime.now() : dateTime,
+              firstDate: DateTime.now(),
+              lastDate: DateTime.now().add(Duration(days: 365 * 200)));
+          if (d != null) {
+            setState(() {
+              dateTime = d;
+            });
+          }
+        });
+  }
+}
+
+class TimePickerStatefulWidget extends StatefulWidget {
+  final String initialText;
+
+  TimePickerStatefulWidget(this.initialText, {Key key}) : super(key: key);
+
+  @override
+  TimePickerStatefulWidgetState createState() =>
+      TimePickerStatefulWidgetState(initialText);
+}
+
+class TimePickerStatefulWidgetState extends State<TimePickerStatefulWidget> {
+  final String initialText;
+  TimeOfDay timeOfDay;
+
+  TimePickerStatefulWidgetState(this.initialText);
+
+  @override
+  Widget build(BuildContext context) {
+    return RaisedButton(
+        color: Theme.of(context).accentColor,
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Text(
+            initialText +
+                (timeOfDay != null ? (':\n' + timeOfDay.format(context)) : ''),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        onPressed: () async {
+          TimeOfDay t = await showTimePicker(
+              context: context,
+              initialTime: timeOfDay == null ? TimeOfDay.now() : timeOfDay);
+          if (t != null) {
+            setState(() {
+              timeOfDay = t;
+            });
+          }
+        });
+  }
+}
+
+Future sleep1() {
+  return Future.delayed(const Duration(seconds: 1), () => "1");
+}
+
+final TimeOfDayFormat userTimeFormat = TimeOfDayFormat.HH_colon_mm;
+
+InputDecoration getInputDecoration(String labelText, String errorText) {
+  return InputDecoration(
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(5.0),
+      borderSide: BorderSide(
+          color: dayNightGradient[7].colors[0], style: BorderStyle.solid),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(5.0),
+      borderSide: BorderSide(
+          color: dayNightGradient[7].colors[0], style: BorderStyle.solid),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(5.0),
+      borderSide: BorderSide(
+          color: dayNightGradient[7].colors[0], style: BorderStyle.solid),
+    ),
+    labelText: labelText,
+    errorText: errorText,
+    hintStyle: TextStyle(color: Colors.white60),
+    labelStyle: TextStyle(color: dayNightGradient[7].colors[0]),
+    disabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(5.0),
+      borderSide: BorderSide(color: Colors.white),
+    ),
+  );
+}
