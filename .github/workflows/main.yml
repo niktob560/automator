@@ -27,4 +27,4 @@ jobs:
       - name: build apk
         uses: steebchen/flutter@v1.1.0
         with:
-          args: build apk --release --split-per-abi
+          args: build apk --split-per-abi
