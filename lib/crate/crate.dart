@@ -114,7 +114,7 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
   @override
   void initState() {
     super.initState();
-    _record = fetchLastCrateRecord();
+    _record = REST.ApiService.getLastCrateRecords();
   }
 
   _fetchRecord() {
@@ -124,7 +124,7 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
   Future<void> _stateResetter() async {
     await sleep1();
     setState(() {
-      _record = fetchLastCrateRecord();
+      _record = REST.ApiService.getLastCrateRecords();
     });
     await _record;
     setState(() {
@@ -491,7 +491,7 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
     print('_loadData');
     var records;
     try {
-      records = await fetchRecords(_allCrateRecords.length, 10);
+      records = await REST.ApiService.getCrateRecords(offset: _allCrateRecords.length, limit: 10);
     } catch (e) {
       print('Error');
       setState(() {
@@ -613,7 +613,7 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
   Future<bool> isLastElemLoaded() async {
     if (isLoading) return true;
     if (_allCrateRecords.length == 0) return false;
-    var list = (await fetchRecords(_allCrateRecords.length, 1));
+    var list = (await REST.ApiService.getCrateRecords(offset: _allCrateRecords.length, limit: 1));
     if (list.length == 0) return true;
     var last = list.elementAt(0);
     return last.id == _allCrateRecords[0].id ||
@@ -623,7 +623,7 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
   Future<bool> hasNewElements() async {
     if (isLoading) return false;
     if (_allCrateRecords.length == 0) return true;
-    var first = (await fetchRecords(0, 1)).elementAt(0);
+    var first = (await REST.ApiService.getCrateRecords(offset: 0, limit: 1)).elementAt(0);
     return first.id != _allCrateRecords[0].id &&
         first.id != _allCrateRecords[_allCrateRecords.length - 1].id;
   }
@@ -665,11 +665,11 @@ Future<CrateRecord> fetchRecord(int id) async {
   return null;
 }
 
-Future<CrateRecord> fetchLastCrateRecord() async {
-  return (await fetchRecords(0, 1)).elementAt(0);
-}
+// Future<CrateRecord> fetchLastCrateRecord() async {
+//   return (await fetchRecords(0, 1)).elementAt(0);
+// }
 
-Future<Set<CrateRecord>> fetchRecords(int offset, int limit) async {
+// Future<Set<CrateRecord>> fetchRecords(int offset, int limit) async {
   // print('Fetch records limit $limit offset $offset');
   // final http.Response response = await http.get(
   //   '$HOST/api/crate/get_records?offset=$offset&limit=$limit',
@@ -689,8 +689,8 @@ Future<Set<CrateRecord>> fetchRecords(int offset, int limit) async {
   //   throw Exception(
   //       'Failed to load crate record limit $limit offset $offset: $rb');
   // }
-  return Set();
-}
+//   // return Set();
+// }
 
 // Future<bool> createCrateRecord(String note) async {
 //   return REST.ApiService.postCrate(note);

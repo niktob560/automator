@@ -28,6 +28,8 @@ dependencies:
   flutter_bloc: ^6.0.0
   equatable: ^1.2.0
   morpheus: ^1.2.2+1
+  url_encoder: ^0.0.3
+
 
 
 

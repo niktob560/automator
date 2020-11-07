@@ -1,4 +1,4 @@
-import 'package:intl/intl.dart';
+import 'package:automator/misc.dart';
 
 class CrateRecord {
   String _note;
@@ -17,5 +17,12 @@ class CrateRecord {
   @override
   String toString() {
     return 'CrateRecord{_note: $_note, _creationDate: $_creationDate, _id: $_id}';
+  }
+  factory CrateRecord.fromJson(Map<String, dynamic> json) {
+    return CrateRecord('${json['note']} ${json['id']}',
+        id: json['id'],
+        creationDate: serverDateFormat
+            .parse(json['creation_date'])
+            .add(DateTime.now().timeZoneOffset));
   }
 }

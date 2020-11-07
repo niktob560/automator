@@ -258,6 +258,8 @@ class _MainStatefulWidgetState extends State<_MainStatefulWidget> {
                           style: TextStyle(color: Colors.white),
                         ),
                         onPressed: () async {
+                          () async {
+
                           var message;
                           try {
                             setState(() {
@@ -300,6 +302,8 @@ class _MainStatefulWidgetState extends State<_MainStatefulWidget> {
                             behavior: SnackBarBehavior.floating,
                           );
                           Scaffold.of(context).showSnackBar(snackBar);
+
+                          }();
                         },
                       ),
                       Center(
