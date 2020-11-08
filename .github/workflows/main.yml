@@ -14,18 +14,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2      
 
-      - name: enable beta channel
-        uses: steebchen/flutter@v1.1.0
-        with:
-          args: channel beta
+#       - name: enable beta channel
+#         uses: steebchen/flutter@v1.1.0
+#         with:
+#           args: channel beta
       
-      - name: update SDK
-        uses: steebchen/flutter@v1.1.0
-        with:
-          args: upgrade
+#       - name: update SDK
+#         uses: steebchen/flutter@v1.1.0
+#         with:
+#           args: upgrade
         
       - name: install deps
-        uses: steebchen/flutter@v1.1.0
+        uses: geowatson/flutter-latest@1.0.0
         with:
           args: pub get
       
@@ -35,6 +35,6 @@ jobs:
 #           args: test
       
       - name: build apk
-        uses: steebchen/flutter@v1.1.0
+        uses: geowatson/flutter-latest@1.0.0
         with:
           args: build apk --split-per-abi
