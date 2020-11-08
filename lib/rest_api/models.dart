@@ -14,6 +14,11 @@ class Record {
   String get note => _note;
   int get id => _id;
 
+
+  set note(String value) {
+    _note = value;
+  }
+
   @override
   String toString() {
     return 'CrateRecord{_note: $_note, _creationDate: $_creationDate, _id: $_id}';

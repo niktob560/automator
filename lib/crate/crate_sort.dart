@@ -54,7 +54,19 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
   TextEditingController _stepContr = TextEditingController();
   TextEditingController _executorContr = TextEditingController();
 
-  _setState(int newState) {
+  _setState(int newState) async {
+    if (_contr.text.isEmpty) {
+      setState(() {
+        _noteErrorMessage = 'Can`t be empty';
+      });
+      return;
+    } else if (_contr.text.length < 4) {
+      setState(() {
+        _noteErrorMessage = 'Must have at least 4 chars';
+      });
+      return;
+    }
+    (await _record).note = _contr.text;
     setState(() {
       _prevStates.add(_state);
       _state = newState;
@@ -225,277 +237,277 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
             Container(
               child: Center(
                   child: [
-                    YesNoStatelessWidget(
-                      question: 'Any to do with this?',
-                      yesFunction: () => _setState(stateIsMyTask),
-                      noFunction: () => _setState(stateArchiveOrNote),
+                YesNoStatelessWidget(
+                  question: 'Any to do with this?',
+                  yesFunction: () => _setState(stateIsMyTask),
+                  noFunction: () => _setState(stateArchiveOrNote),
+                ),
+                YesNoStatelessWidget(
+                  question: 'Is it my task?',
+                  yesFunction: () => _setState(stateIsNow),
+                  noFunction: () => _setState(stateAwait),
+                ),
+                YesNoStatelessWidget(
+                  question: 'Now?',
+                  yesFunction: () => _setState(stateIsOneStep),
+                  noFunction: () => _setState(stateIsTimed),
+                ),
+                YesNoStatelessWidget(
+                  question: 'One step?',
+                  yesFunction: () => _setState(stateIsEpsilonTime),
+                  noFunction: () => _setState(stateProject),
+                ),
+                YesNoStatelessWidget(
+                  question: 'Can be done in a little of time?',
+                  yesFunction: () => _setState(stateDoIt),
+                  noFunction: () => _setState(stateCurrentTask),
+                ),
+                YesNoStatelessWidget(
+                  question: 'Put to archive or notes?',
+                  yesText: 'Archive',
+                  yesFunction: () => _setState(stateArchive),
+                  noText: 'Notes',
+                  noFunction: () => _setState(stateNotes),
+                ),
+                YesNoStatelessWidget(
+                  question: 'Has a deadline?',
+                  yesFunction: () => _setState(stateSetDeadline),
+                  noFunction: () => _setState(stateNotTimed),
+                ),
+                Column(
+                  //Project
+                  children: [
+                    const SizedBox(height: 16),
+                    TextField(
+                      decoration: getInputDecoration(
+                          'Finish criteria', _finishCriteriaErrorMessage),
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      controller: _criteriaContr,
                     ),
-                    YesNoStatelessWidget(
-                      question: 'Is it my task?',
-                      yesFunction: () => _setState(stateIsNow),
-                      noFunction: () => _setState(stateAwait),
-                    ),
-                    YesNoStatelessWidget(
-                      question: 'Now?',
-                      yesFunction: () => _setState(stateIsOneStep),
-                      noFunction: () => _setState(stateIsTimed),
-                    ),
-                    YesNoStatelessWidget(
-                      question: 'One step?',
-                      yesFunction: () => _setState(stateIsEpsilonTime),
-                      noFunction: () => _setState(stateProject),
-                    ),
-                    YesNoStatelessWidget(
-                      question: 'Can be done in a little of time?',
-                      yesFunction: () => _setState(stateDoIt),
-                      noFunction: () => _setState(stateCurrentTask),
-                    ),
-                    YesNoStatelessWidget(
-                      question: 'Put to archive or notes?',
-                      yesText: 'Archive',
-                      yesFunction: () => _setState(stateArchive),
-                      noText: 'Notes',
-                      noFunction: () => _setState(stateNotes),
-                    ),
-                    YesNoStatelessWidget(
-                      question: 'Has a deadline?',
-                      yesFunction: () => _setState(stateSetDeadline),
-                      noFunction: () => _setState(stateNotTimed),
-                    ),
-                    Column(
-                      //Project
-                      children: [
-                        const SizedBox(height: 16),
-                        TextField(
-                          decoration: getInputDecoration(
-                              'Finish criteria', _finishCriteriaErrorMessage),
-                          maxLines: null,
-                          keyboardType: TextInputType.multiline,
-                          controller: _criteriaContr,
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          decoration:
+                    const SizedBox(height: 16),
+                    TextField(
+                      decoration:
                           getInputDecoration('A rough plan', _planErrorMessage),
-                          maxLines: null,
-                          keyboardType: TextInputType.multiline,
-                          controller: _planContr,
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          decoration: getInputDecoration(
-                              'First step', _firstStepErrorMessage),
-                          maxLines: null,
-                          keyboardType: TextInputType.multiline,
-                          controller: _stepContr,
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          width: double.infinity,
-                          child: RaisedButton(
-                              child: Text(
-                                'Done',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              color: Theme.of(context).accentColor,
-                              onPressed: () {
-                                print(
-                                    '${_criteriaContr.text} ${_planContr.text} ${_stepContr.text}');
-                                setState(() {
-                                  _finishCriteriaErrorMessage = null;
-                                  _planErrorMessage = null;
-                                  _firstStepErrorMessage = null;
-                                });
-                                var valid = true;
-                                setState(() {
-                                  if (_criteriaContr.text.length == 0) {
-                                    valid = false;
-                                    _finishCriteriaErrorMessage = 'Can`t be empty';
-                                  }
-                                  if (_planContr.text.length == 0) {
-                                    valid = false;
-                                    _planErrorMessage = 'Can`t be empty';
-                                  }
-                                  if (_stepContr.text.length == 0) {
-                                    valid = false;
-                                    _firstStepErrorMessage = 'Can`t be empty';
-                                  } else if (_stepContr.text.length < 4) {
-                                    valid = false;
-                                    _firstStepErrorMessage =
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      controller: _planContr,
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      decoration: getInputDecoration(
+                          'First step', _firstStepErrorMessage),
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      controller: _stepContr,
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      child: RaisedButton(
+                          child: Text(
+                            'Done',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          color: Theme.of(context).accentColor,
+                          onPressed: () {
+                            print(
+                                '${_criteriaContr.text} ${_planContr.text} ${_stepContr.text}');
+                            setState(() {
+                              _finishCriteriaErrorMessage = null;
+                              _planErrorMessage = null;
+                              _firstStepErrorMessage = null;
+                            });
+                            var valid = true;
+                            setState(() {
+                              if (_criteriaContr.text.length == 0) {
+                                valid = false;
+                                _finishCriteriaErrorMessage = 'Can`t be empty';
+                              }
+                              if (_planContr.text.length == 0) {
+                                valid = false;
+                                _planErrorMessage = 'Can`t be empty';
+                              }
+                              if (_stepContr.text.length == 0) {
+                                valid = false;
+                                _firstStepErrorMessage = 'Can`t be empty';
+                              } else if (_stepContr.text.length < 4) {
+                                valid = false;
+                                _firstStepErrorMessage =
                                     'Must contain at least 4 chars';
-                                  }
-                                });
-                                if (valid) _finishState(stateProjectDone);
-                              }),
-                        )
-                      ],
+                              }
+                            });
+                            if (valid) _finishState(stateProjectDone);
+                          }),
+                    )
+                  ],
+                ),
+                Column(
+                  children: [
+                    const SizedBox(
+                      height: 8,
                     ),
-                    Column(
-                      children: [
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        Text(
-                          'Do it!',
-                          style: TextStyle(
-                              fontSize: 42,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
-                        ),
-                        Center(
-                          child: Icon(Icons.double_arrow,
-                              size: MediaQuery.of(context).size.width * 0.8),
-                        ),
-                        Container(
-                          width: double.infinity,
-                          child: RaisedButton(
-                              child: Text('Done',
-                                  style:
-                                  TextStyle(color: Colors.white, fontSize: 24)),
-                              color: Theme.of(context).accentColor,
-                              onPressed: () => _finishState(stateDone)),
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        )
-                      ],
+                    Text(
+                      'Do it!',
+                      style: TextStyle(
+                          fontSize: 42,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
                     ),
-                    Column(
-                      //Await
-                      children: [
-                        const SizedBox(height: 16),
-                        TextField(
-                          decoration:
-                          getInputDecoration('Executor', _executorErrorMessage),
-                          maxLines: null,
-                          keyboardType: TextInputType.multiline,
-                          controller: _executorContr,
-                        ),
-                        const SizedBox(height: 32),
-                        Container(
-                            width: double.infinity,
-                            child: DatePickerStatefulWidget('Execution date',
-                                dateCallback: (d) => _date = d)),
-                        const SizedBox(height: 32),
-                        Container(
-                            width: double.infinity,
-                            child: TimePickerStatefulWidget('Execution time',
-                                timeCallback: (t) => _time = t)),
-                        const SizedBox(height: 32),
-                        Container(
-                          width: double.infinity,
-                          child: RaisedButton(
-                              child: Text(
-                                'Done',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              color: Theme.of(context).accentColor,
-                              onPressed: () => _executorContr.text.length > 0
-                                  ? _finishState(stateAwaitDone)
-                                  : setState(() {
-                                _executorErrorMessage =
-                                'Executor must be set';
-                              })),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      //Current
-                      children: [
-                        const SizedBox(height: 32),
-                        Container(
-                            width: double.infinity,
-                            child: RaisedButton(
-                              child: Text('Add to current tasks'),
-                              onPressed: () => _finishState(stateCurrentTaskDone),
-                            )),
-                      ],
-                    ),
-                    Column(
-                      //Archive
-                      children: [
-                        const SizedBox(height: 32),
-                        Container(
-                            width: double.infinity,
-                            child: RaisedButton(
-                              child: Text('Add to archive'),
-                              onPressed: () => _finishState(stateArchiveDone),
-                            )),
-                      ],
-                    ),
-                    Column(
-                      //Notes
-                      children: [
-                        const SizedBox(height: 32),
-                        Container(
-                            width: double.infinity,
-                            child: RaisedButton(
-                              child: Text('Add to notes'),
-                              onPressed: () => setState(() {
-                                _finishState(stateNotesDone);
-                              }),
-                            )),
-                      ],
-                    ),
-                    Column(
-                      //Calendar
-                      children: [
-                        const SizedBox(height: 64),
-                        Container(
-                            width: double.infinity,
-                            child: DatePickerStatefulWidget('Execution date')),
-                        const SizedBox(height: 32),
-                        Container(
-                            width: double.infinity,
-                            child: TimePickerStatefulWidget('Execution time')),
-                        const SizedBox(height: 32),
-                        Container(
-                            width: double.infinity,
-                            child: RaisedButton(
-                              child: Text('Add on calendar'),
-                              onPressed: () => _finishState(stateCalendarDone),
-                            )),
-                        const SizedBox(height: 32),
-                      ],
+                    Center(
+                      child: Icon(Icons.double_arrow,
+                          size: MediaQuery.of(context).size.width * 0.8),
                     ),
                     Container(
-                      //Later
+                      width: double.infinity,
+                      child: RaisedButton(
+                          child: Text('Done',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 24)),
+                          color: Theme.of(context).accentColor,
+                          onPressed: () => _finishState(stateDone)),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    )
+                  ],
+                ),
+                Column(
+                  //Await
+                  children: [
+                    const SizedBox(height: 16),
+                    TextField(
+                      decoration:
+                          getInputDecoration('Executor', _executorErrorMessage),
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      controller: _executorContr,
+                    ),
+                    const SizedBox(height: 32),
+                    Container(
                         width: double.infinity,
-                        child: Padding(
-                            padding: EdgeInsets.only(top: 32),
-                            child: RaisedButton(
-                              child: Text('Add to later tasks'),
-                              onPressed: () => _finishState(stateLaterDone),
-                            ))),
-                    IconTextWidget(
-                        Icons.list_alt, 'Project added to current projects!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                    IconTextWidget(Icons.done, 'Task done!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                    IconTextWidget(Icons.timelapse, 'Task added to current tasks!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                    IconTextWidget(
-                        Icons.archive_rounded, 'Record added to archive!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                    IconTextWidget(Icons.edit, 'Record added to notes!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                    IconTextWidget(Icons.calendar_today, 'Task added on calendar!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                    IconTextWidget(Icons.timelapse, 'Task added on later tasks!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                    IconTextWidget(
-                        Icons.accessibility, 'Task added on await tasks!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                  ][_state]),
+                        child: DatePickerStatefulWidget('Execution date',
+                            dateCallback: (d) => _date = d)),
+                    const SizedBox(height: 32),
+                    Container(
+                        width: double.infinity,
+                        child: TimePickerStatefulWidget('Execution time',
+                            timeCallback: (t) => _time = t)),
+                    const SizedBox(height: 32),
+                    Container(
+                      width: double.infinity,
+                      child: RaisedButton(
+                          child: Text(
+                            'Done',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          color: Theme.of(context).accentColor,
+                          onPressed: () => _executorContr.text.length > 0
+                              ? _finishState(stateAwaitDone)
+                              : setState(() {
+                                  _executorErrorMessage =
+                                      'Executor must be set';
+                                })),
+                    ),
+                  ],
+                ),
+                Column(
+                  //Current
+                  children: [
+                    const SizedBox(height: 32),
+                    Container(
+                        width: double.infinity,
+                        child: RaisedButton(
+                          child: Text('Add to current tasks'),
+                          onPressed: () => _finishState(stateCurrentTaskDone),
+                        )),
+                  ],
+                ),
+                Column(
+                  //Archive
+                  children: [
+                    const SizedBox(height: 32),
+                    Container(
+                        width: double.infinity,
+                        child: RaisedButton(
+                          child: Text('Add to archive'),
+                          onPressed: () => _finishState(stateArchiveDone),
+                        )),
+                  ],
+                ),
+                Column(
+                  //Notes
+                  children: [
+                    const SizedBox(height: 32),
+                    Container(
+                        width: double.infinity,
+                        child: RaisedButton(
+                          child: Text('Add to notes'),
+                          onPressed: () => setState(() {
+                            _finishState(stateNotesDone);
+                          }),
+                        )),
+                  ],
+                ),
+                Column(
+                  //Calendar
+                  children: [
+                    const SizedBox(height: 64),
+                    Container(
+                        width: double.infinity,
+                        child: DatePickerStatefulWidget('Execution date')),
+                    const SizedBox(height: 32),
+                    Container(
+                        width: double.infinity,
+                        child: TimePickerStatefulWidget('Execution time')),
+                    const SizedBox(height: 32),
+                    Container(
+                        width: double.infinity,
+                        child: RaisedButton(
+                          child: Text('Add on calendar'),
+                          onPressed: () => _finishState(stateCalendarDone),
+                        )),
+                    const SizedBox(height: 32),
+                  ],
+                ),
+                Container(
+                    //Later
+                    width: double.infinity,
+                    child: Padding(
+                        padding: EdgeInsets.only(top: 32),
+                        child: RaisedButton(
+                          child: Text('Add to later tasks'),
+                          onPressed: () => _finishState(stateLaterDone),
+                        ))),
+                IconTextWidget(
+                    Icons.list_alt, 'Project added to current projects!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(Icons.done, 'Task done!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(Icons.timelapse, 'Task added to current tasks!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(
+                    Icons.archive_rounded, 'Record added to archive!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(Icons.edit, 'Record added to notes!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(Icons.calendar_today, 'Task added on calendar!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(Icons.timelapse, 'Task added on later tasks!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(
+                    Icons.accessibility, 'Task added on await tasks!',
+                    iconColor: Colors.white, textColor: Colors.white),
+              ][_state]),
               width: double.infinity,
             ),
             snapshot.connectionState == ConnectionState.done && !_isFinishing
                 ? Container()
                 : Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ))
+                    padding: EdgeInsets.only(top: 8),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ))
           ]);
           if (_prevStates.length > 0) {
             children.add(const SizedBox(height: 16));
@@ -530,9 +542,9 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
             ),
             Center(
                 child: Text(
-                  "Loading...",
-                  style: TextStyle(fontSize: 24),
-                ))
+              "Loading...",
+              style: TextStyle(fontSize: 24),
+            ))
           ]);
         }
 
@@ -548,8 +560,8 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
 
         return Center(
             child: ListView(
-              children: children_padded,
-            ));
+          children: children_padded,
+        ));
       },
     );
   }
