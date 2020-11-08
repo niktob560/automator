@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
-      - uses: actions/checkout@v2      
+      - uses: actions/checkout@v2
 
 #       - name: enable beta channel
 #         uses: steebchen/flutter@v1.1.0
@@ -34,7 +34,7 @@ jobs:
 #         with:
 #           args: test
       
-      - name: build apk
+      - name: run tests
         uses: geowatson/flutter-latest@1.0.0
         with:
-          args: build apk --split-per-abi
+          args: test
