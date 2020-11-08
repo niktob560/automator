@@ -18,7 +18,7 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
   GlobalKey<DatePickerStatefulWidgetState> _datePickerKey = GlobalKey();
   List<int> _prevStates = [];
   bool _isFinishing = false;
-  Future<CrateRecord> _record;
+  Future<Record> _record;
   static const int stateAnyToDo = 0,
       stateIsMyTask = 1,
       stateIsNow = 2,
@@ -64,24 +64,26 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
       _isFinishing = true;
     });
     // String url = "/";
-    // var id = (await _record).id;
-    // switch(newState) {
-    //   case stateArchiveDone:
-    //     url = url + "archive/make_archive?id=$id";
-    //     break;
-    //   case stateNotesDone:
-    //     url = url + "notes/make_note?id=$id";
-    //     break;
-    //   case stateDone:
-    //     url = url + "done/make_done?id=$id";
-    //     break;
-    //   case stateCurrentTaskDone:
-    //     url = url + "current/make_current?id=$id";
-    //     break;
-    //   case stateLaterDone:
-    //     url = url + "later/make_later?id=$id";
-    //     break;
-    // }
+    var id = (await _record).id;
+    var res;
+    switch(newState) {
+      case stateArchiveDone:
+        res = await REST.ApiService.makeArchive(id);
+        // url = url + "archive/make_archive?id=$id";
+        break;
+      case stateNotesDone:
+        // url = url + "notes/make_note?id=$id";
+        break;
+      case stateDone:
+        // url = url + "done/make_done?id=$id";
+        break;
+      case stateCurrentTaskDone:
+        // url = url + "current/make_current?id=$id";
+        break;
+      case stateLaterDone:
+        // url = url + "later/make_later?id=$id";
+        break;
+    }
     // url = HOST + "/api" + url;
     // try {
     //   var resp = await http.patch(url);
@@ -92,17 +94,18 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
     //   }
     // }
     // catch (e) {
-    //   setState(() {
-    //     _isFinishing = false;
-    //   });
-    //   print("Failed to send! $e");
-    //   final snackBar = SnackBar(
-    //     content: Text("Failed to send request"),
-    //     behavior: SnackBarBehavior.floating,
-    //   );
-    //   Scaffold.of(context).showSnackBar(snackBar);
-    //   return;
-    // }
+    if (res == null || !res) {
+      setState(() {
+        _isFinishing = false;
+      });
+      print("Failed to send!");
+      final snackBar = SnackBar(
+        content: Text("Failed to send request"),
+        behavior: SnackBarBehavior.floating,
+      );
+      Scaffold.of(context).showSnackBar(snackBar);
+      return;
+    }
     setState(() {
       _prevStates.clear();
       _state = newState;
@@ -136,7 +139,7 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: _record,
-      builder: (BuildContext context, AsyncSnapshot<CrateRecord> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<Record> snapshot) {
         List<Widget> children = [
           Text(
             'Sort a record',
@@ -446,7 +449,7 @@ class AllCrateStatefulWidget extends StatefulWidget {
 
 class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
   ScrollController controller;
-  final _allCrateRecords = <CrateRecord>[];
+  final _allCrateRecords = <Record>[];
   bool failed = false;
   GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
   bool isLoading = false;
@@ -527,7 +530,7 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
         ));
   }
 
-  Widget _buildRow(CrateRecord record) {
+  Widget _buildRow(Record record) {
     final int hour = record.creationDate.hour % 24;
     final bool isDay = hour > 10 && hour < 16;
     return Container(
@@ -651,7 +654,7 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
 //   }
 // }
 
-Future<CrateRecord> fetchRecord(int id) async {
+Future<Record> fetchRecord(int id) async {
   // final http.Response response = await http.get(
   //   '$HOST/api/crate/get_record?id=$id',
   //   headers: <String, String>{

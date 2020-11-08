@@ -1,11 +1,11 @@
 import 'package:automator/misc.dart';
 
-class CrateRecord {
+class Record {
   String _note;
   DateTime _creationDate;
   int _id;
 
-  CrateRecord(this._note, {creationDate, id}) {
+  Record(this._note, {creationDate, id}) {
     _creationDate = creationDate;
     _id = id;
   }
@@ -18,8 +18,8 @@ class CrateRecord {
   String toString() {
     return 'CrateRecord{_note: $_note, _creationDate: $_creationDate, _id: $_id}';
   }
-  factory CrateRecord.fromJson(Map<String, dynamic> json) {
-    return CrateRecord('${json['note']} ${json['id']}',
+  factory Record.fromJson(Map<String, dynamic> json) {
+    return Record('${json['note']} ${json['id']}',
         id: json['id'],
         creationDate: serverDateFormat
             .parse(json['creation_date'])
