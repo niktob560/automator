@@ -21,8 +21,12 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
   Future<Record> _record;
   DateTime _date;
   TimeOfDay _time;
-  Set<String> _projectSteps;
-  String _errorMessage;
+  Set<String> _projectSteps = Set();
+  String _executorErrorMessage,
+      _finishCriteriaErrorMessage,
+      _planErrorMessage,
+      _firstStepErrorMessage,
+      _noteErrorMessage;
   static const int stateAnyToDo = 0,
       stateIsMyTask = 1,
       stateIsNow = 2,
@@ -47,9 +51,11 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
       stateLaterDone = 21,
       stateAwaitDone = 22;
 
-  TextEditingController   _contr = TextEditingController();
-  TextEditingController   _executorContr = TextEditingController();
-  ValueNotifier<DateTime> _dateNotifier = ValueNotifier(null);
+  TextEditingController _contr = TextEditingController();
+  TextEditingController _planContr = TextEditingController();
+  TextEditingController _criteriaContr = TextEditingController();
+  TextEditingController _stepContr = TextEditingController();
+  TextEditingController _executorContr = TextEditingController();
 
   _setState(int newState) {
     setState(() {
@@ -61,7 +67,7 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
   _backState() {
     _date = null;
     _time = null;
-    _projectSteps = null;
+    _projectSteps = Set();
     var s = _prevStates.last;
     _prevStates.remove(s);
     setState(() {
@@ -70,72 +76,91 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
   }
 
   _finishState(int newState) async {
+    if (_contr.text.isEmpty) {
+      setState(() {
+        _noteErrorMessage = 'Can`t be empty';
+      });
+      return;
+    }
+    else if (_contr.text.length < 4) {
+      setState(() {
+        _noteErrorMessage = 'Must have at least 4 chars';
+      });
+      return;
+    }
     setState(() {
-      _errorMessage = null;
+      _executorErrorMessage = null;
+      _finishCriteriaErrorMessage = null;
+      _planErrorMessage = null;
+      _firstStepErrorMessage = null;
+      _noteErrorMessage = null;
       _isFinishing = true;
     });
-    // String url = "/";
     var id = (await _record).id;
     var oldNote = (await _record).note;
     var res;
     var msg;
-    switch(newState) {
-      case stateArchiveDone:
-        if (_contr.text != oldNote)
-          res = await REST.ApiService.makeArchive(id, newNote: _contr.text);
-        else
-          res = await REST.ApiService.makeArchive(id);
-        break;
-      case stateNotesDone:
-        if (_contr.text != oldNote)
-          res = await REST.ApiService.makeNote(id, newNote: _contr.text);
-        else
-          res = await REST.ApiService.makeNote(id);
-        break;
-      case stateDone:
-        if (_contr.text != oldNote)
-          res = await REST.ApiService.makeDone(id, newNote: _contr.text);
-        else
-          res = await REST.ApiService.makeDone(id);
-        break;
-      case stateCurrentTaskDone:
-        if (_contr.text != oldNote)
-          res = await REST.ApiService.makeCurrent(id, newNote: _contr.text);
-        else
-          res = await REST.ApiService.makeCurrent(id);
-        break;
-      case stateLaterDone:
-        if (_contr.text != oldNote)
-          res = await REST.ApiService.makeLater(id, newNote: _contr.text);
-        else
-          res = await REST.ApiService.makeLater(id);
-        break;
-      case stateAwaitDone:
-        print('$_date $_time ${_executorContr.text}');
-        if (_date == null) {
-          msg = "Date must be set";
-        }
-        else if (_time == null) {
-          msg = "Time must be set";
-        }
-        else if (_executorContr.text == null || _executorContr.text.length == 0) {
-          msg = "Executor must be set";
-        }
-        else {
-          try {
-            res = await REST.ApiService.makeAwait(id, DateTime(
-                _date.year, _date.month, _date.day, _time.hour, _time.minute),
+    try {
+      switch (newState) {
+        case stateArchiveDone:
+          if (_contr.text != oldNote)
+            res = await REST.ApiService.makeArchive(id, newNote: _contr.text);
+          else
+            res = await REST.ApiService.makeArchive(id);
+          break;
+        case stateNotesDone:
+          if (_contr.text != oldNote)
+            res = await REST.ApiService.makeNote(id, newNote: _contr.text);
+          else
+            res = await REST.ApiService.makeNote(id);
+          break;
+        case stateDone:
+          if (_contr.text != oldNote)
+            res = await REST.ApiService.makeDone(id, newNote: _contr.text);
+          else
+            res = await REST.ApiService.makeDone(id);
+          break;
+        case stateCurrentTaskDone:
+          if (_contr.text != oldNote)
+            res = await REST.ApiService.makeCurrent(id, newNote: _contr.text);
+          else
+            res = await REST.ApiService.makeCurrent(id);
+          break;
+        case stateLaterDone:
+          if (_contr.text != oldNote)
+            res = await REST.ApiService.makeLater(id, newNote: _contr.text);
+          else
+            res = await REST.ApiService.makeLater(id);
+          break;
+        case stateAwaitDone:
+          print('$_date $_time ${_executorContr.text}');
+          if (_date == null) {
+            msg = "Date must be set";
+          } else if (_time == null) {
+            msg = "Time must be set";
+          } else if (_executorContr.text == null ||
+              _executorContr.text.length == 0) {
+            msg = "Executor must be set";
+          } else {
+            res = await REST.ApiService.makeAwait(
+                id,
+                DateTime(_date.year, _date.month, _date.day, _time.hour,
+                    _time.minute),
                 _executorContr.text);
           }
-          catch (e) {
-            print('$e');
-          }
-        }
-        break;
+          break;
+        case stateProjectDone:
+          var s = [_stepContr.text];
+          res = await REST.ApiService.makeProject(
+              id, _criteriaContr.text, _planContr.text, s);
+          break;
+      }
+    } catch (e) {
+      print('$e');
     }
     if (msg == null && (res == null || !res)) {
       print("Failed to send: query returned $res");
-      msg = "Failed to send request" + (res != null? "" : ": server error");
+      msg = "Failed to send request" + (res != null ? "" : ": server error");
     }
     if (msg != null) {
       setState(() {
@@ -196,7 +221,7 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
         if (snapshot.hasData) {
           children.addAll([
             TextField(
-              decoration: getInputDecoration('Record', null),
+              decoration: getInputDecoration('Record', _noteErrorMessage),
               controller: _contr,
               maxLines: null,
               keyboardType: TextInputType.multiline,
@@ -204,228 +229,277 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
             Container(
               child: Center(
                   child: [
-                    YesNoStatelessWidget(
-                      question: 'Any to do with this?',
-                      yesFunction: () => _setState(stateIsMyTask),
-                      noFunction: () => _setState(stateArchiveOrNote),
+                YesNoStatelessWidget(
+                  question: 'Any to do with this?',
+                  yesFunction: () => _setState(stateIsMyTask),
+                  noFunction: () => _setState(stateArchiveOrNote),
+                ),
+                YesNoStatelessWidget(
+                  question: 'Is it my task?',
+                  yesFunction: () => _setState(stateIsNow),
+                  noFunction: () => _setState(stateAwait),
+                ),
+                YesNoStatelessWidget(
+                  question: 'Now?',
+                  yesFunction: () => _setState(stateIsOneStep),
+                  noFunction: () => _setState(stateIsTimed),
+                ),
+                YesNoStatelessWidget(
+                  question: 'One step?',
+                  yesFunction: () => _setState(stateIsEpsilonTime),
+                  noFunction: () => _setState(stateProject),
+                ),
+                YesNoStatelessWidget(
+                  question: 'Can be done in a little of time?',
+                  yesFunction: () => _setState(stateDoIt),
+                  noFunction: () => _setState(stateCurrentTask),
+                ),
+                YesNoStatelessWidget(
+                  question: 'Put to archive or notes?',
+                  yesText: 'Archive',
+                  yesFunction: () => _setState(stateArchive),
+                  noText: 'Notes',
+                  noFunction: () => _setState(stateNotes),
+                ),
+                YesNoStatelessWidget(
+                  question: 'Has a deadline?',
+                  yesFunction: () => _setState(stateSetDeadline),
+                  noFunction: () => _setState(stateNotTimed),
+                ),
+                Column(
+                  //Project
+                  children: [
+                    const SizedBox(height: 16),
+                    TextField(
+                      decoration: getInputDecoration(
+                          'Finish criteria', _finishCriteriaErrorMessage),
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      controller: _criteriaContr,
                     ),
-                    YesNoStatelessWidget(
-                      question: 'Is it my task?',
-                      yesFunction: () => _setState(stateIsNow),
-                      noFunction: () => _setState(stateAwait),
+                    const SizedBox(height: 16),
+                    TextField(
+                      decoration:
+                          getInputDecoration('A rough plan', _planErrorMessage),
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      controller: _planContr,
                     ),
-                    YesNoStatelessWidget(
-                      question: 'Now?',
-                      yesFunction: () => _setState(stateIsOneStep),
-                      noFunction: () => _setState(stateIsTimed),
+                    const SizedBox(height: 16),
+                    TextField(
+                      decoration: getInputDecoration(
+                          'First step', _firstStepErrorMessage),
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      controller: _stepContr,
                     ),
-                    YesNoStatelessWidget(
-                      question: 'One step?',
-                      yesFunction: () => _setState(stateIsEpsilonTime),
-                      noFunction: () => _setState(stateProject),
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      child: RaisedButton(
+                          child: Text(
+                            'Done',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          color: Theme.of(context).accentColor,
+                          onPressed: () {
+                            print(
+                                '${_criteriaContr.text} ${_planContr.text} ${_stepContr.text}');
+                            setState(() {
+                              _finishCriteriaErrorMessage = null;
+                              _planErrorMessage = null;
+                              _firstStepErrorMessage = null;
+                            });
+                            var valid = true;
+                            setState(() {
+                              if (_criteriaContr.text.length == 0) {
+                                valid = false;
+                                _finishCriteriaErrorMessage = 'Can`t be empty';
+                              }
+                              if (_planContr.text.length == 0) {
+                                valid = false;
+                                _planErrorMessage = 'Can`t be empty';
+                              }
+                              if (_stepContr.text.length == 0) {
+                                valid = false;
+                                _firstStepErrorMessage = 'Can`t be empty';
+                              }
+                              else if (_stepContr.text.length < 4) {
+                                valid = false;
+                                _firstStepErrorMessage = 'Must contain at least 4 chars';
+                              }
+                            });
+                            if (valid) _finishState(stateProjectDone);
+                          }),
+                    )
+                  ],
+                ),
+                Column(
+                  children: [
+                    const SizedBox(
+                      height: 8,
                     ),
-                    YesNoStatelessWidget(
-                      question: 'Can be done in a little of time?',
-                      yesFunction: () => _setState(stateDoIt),
-                      noFunction: () => _setState(stateCurrentTask),
+                    Text(
+                      'Do it!',
+                      style: TextStyle(
+                          fontSize: 42,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
                     ),
-                    YesNoStatelessWidget(
-                      question: 'Put to archive or notes?',
-                      yesText: 'Archive',
-                      yesFunction: () => _setState(stateArchive),
-                      noText: 'Notes',
-                      noFunction: () => _setState(stateNotes),
-                    ),
-                    YesNoStatelessWidget(
-                      question: 'Has a deadline?',
-                      yesFunction: () => _setState(stateSetDeadline),
-                      noFunction: () => _setState(stateNotTimed),
-                    ),
-                    Column(
-                      //Setup project
-                      children: [
-                        const SizedBox(height: 16),
-                        TextField(
-                          decoration: getInputDecoration('Finish criteria', null),
-                          maxLines: null,
-                          keyboardType: TextInputType.multiline,
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          decoration: getInputDecoration('A rough plan', null),
-                          maxLines: null,
-                          keyboardType: TextInputType.multiline,
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          decoration: getInputDecoration('First step', null),
-                          maxLines: null,
-                          keyboardType: TextInputType.multiline,
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          width: double.infinity,
-                          child: RaisedButton(
-                              child: Text(
-                                'Done',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              color: Theme.of(context).accentColor,
-                              onPressed: () => _finishState(stateProjectDone)),
-                        )
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        Text(
-                          'Do it!',
-                          style: TextStyle(
-                              fontSize: 42,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
-                        ),
-                        Center(
-                          child: Icon(Icons.double_arrow,
-                              size: MediaQuery.of(context).size.width * 0.8),
-                        ),
-                        Container(
-                          width: double.infinity,
-                          child: RaisedButton(
-                              child: Text('Done',
-                                  style:
-                                  TextStyle(color: Colors.white, fontSize: 24)),
-                              color: Theme.of(context).accentColor,
-                              onPressed: () => _finishState(stateDone)),
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        )
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        const SizedBox(height: 16),
-                        TextField(
-                          decoration: getInputDecoration('Executor', _errorMessage),
-                          maxLines: null,
-                          keyboardType: TextInputType.multiline,
-                          controller: _executorContr,
-                        ),
-                        const SizedBox(height: 32),
-                        Container(
-                            width: double.infinity,
-                            child: DatePickerStatefulWidget('Execution date', dateCallback: (d) => _date = d)),
-                        const SizedBox(height: 32),
-                        Container(
-                            width: double.infinity,
-                            child: TimePickerStatefulWidget('Execution time', timeCallback: (t) => _time = t)),
-                        const SizedBox(height: 32),
-                        Container(
-                          width: double.infinity,
-                          child: RaisedButton(
-                              child: Text(
-                                'Done',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              color: Theme.of(context).accentColor,
-                              onPressed: () => _executorContr.text.length > 0? _finishState(stateAwaitDone) : setState(() {_errorMessage = 'Executor must be set';})),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        const SizedBox(height: 32),
-                        Container(
-                            width: double.infinity,
-                            child: RaisedButton(
-                              child: Text('Add to current tasks'),
-                              onPressed: () => _finishState(stateCurrentTaskDone),
-                            )),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        const SizedBox(height: 32),
-                        Container(
-                            width: double.infinity,
-                            child: RaisedButton(
-                              child: Text('Add to archive'),
-                              onPressed: () => _finishState(stateArchiveDone),
-                            )),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        const SizedBox(height: 32),
-                        Container(
-                            width: double.infinity,
-                            child: RaisedButton(
-                              child: Text('Add to notes'),
-                              onPressed: () => setState(() {
-                                _finishState(stateNotesDone);
-                              }),
-                            )),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        const SizedBox(height: 64),
-                        Container(
-                            width: double.infinity,
-                            child: DatePickerStatefulWidget('Execution date')),
-                        const SizedBox(height: 32),
-                        Container(
-                            width: double.infinity,
-                            child: TimePickerStatefulWidget('Execution time')),
-                        const SizedBox(height: 32),
-                        Container(
-                            width: double.infinity,
-                            child: RaisedButton(
-                              child: Text('Add on calendar'),
-                              onPressed: () => _finishState(stateCalendarDone),
-                            )),
-                        const SizedBox(height: 32),
-                      ],
+                    Center(
+                      child: Icon(Icons.double_arrow,
+                          size: MediaQuery.of(context).size.width * 0.8),
                     ),
                     Container(
+                      width: double.infinity,
+                      child: RaisedButton(
+                          child: Text('Done',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 24)),
+                          color: Theme.of(context).accentColor,
+                          onPressed: () => _finishState(stateDone)),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    )
+                  ],
+                ),
+                Column(
+                  //Await
+                  children: [
+                    const SizedBox(height: 16),
+                    TextField(
+                      decoration:
+                          getInputDecoration('Executor', _executorErrorMessage),
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      controller: _executorContr,
+                    ),
+                    const SizedBox(height: 32),
+                    Container(
                         width: double.infinity,
-                        child: Padding(
-                            padding: EdgeInsets.only(top: 32),
-                            child: RaisedButton(
-                              child: Text('Add to later tasks'),
-                              onPressed: () => _finishState(stateLaterDone),
-                            ))),
-                    IconTextWidget(
-                        Icons.list_alt, 'Project added to current projects!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                    IconTextWidget(Icons.done, 'Task done!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                    IconTextWidget(Icons.timelapse, 'Task added to current tasks!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                    IconTextWidget(
-                        Icons.archive_rounded, 'Record added to archive!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                    IconTextWidget(Icons.edit, 'Record added to notes!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                    IconTextWidget(Icons.calendar_today, 'Task added on calendar!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                    IconTextWidget(Icons.timelapse, 'Task added on later tasks!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                    IconTextWidget(Icons.accessibility, 'Task added on await tasks!',
-                        iconColor: Colors.white, textColor: Colors.white),
-                  ][_state]),
+                        child: DatePickerStatefulWidget('Execution date',
+                            dateCallback: (d) => _date = d)),
+                    const SizedBox(height: 32),
+                    Container(
+                        width: double.infinity,
+                        child: TimePickerStatefulWidget('Execution time',
+                            timeCallback: (t) => _time = t)),
+                    const SizedBox(height: 32),
+                    Container(
+                      width: double.infinity,
+                      child: RaisedButton(
+                          child: Text(
+                            'Done',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          color: Theme.of(context).accentColor,
+                          onPressed: () => _executorContr.text.length > 0
+                              ? _finishState(stateAwaitDone)
+                              : setState(() {
+                                  _executorErrorMessage =
+                                      'Executor must be set';
+                                })),
+                    ),
+                  ],
+                ),
+                Column(
+                  //Current
+                  children: [
+                    const SizedBox(height: 32),
+                    Container(
+                        width: double.infinity,
+                        child: RaisedButton(
+                          child: Text('Add to current tasks'),
+                          onPressed: () => _finishState(stateCurrentTaskDone),
+                        )),
+                  ],
+                ),
+                Column(
+                  //Archive
+                  children: [
+                    const SizedBox(height: 32),
+                    Container(
+                        width: double.infinity,
+                        child: RaisedButton(
+                          child: Text('Add to archive'),
+                          onPressed: () => _finishState(stateArchiveDone),
+                        )),
+                  ],
+                ),
+                Column(
+                  //Notes
+                  children: [
+                    const SizedBox(height: 32),
+                    Container(
+                        width: double.infinity,
+                        child: RaisedButton(
+                          child: Text('Add to notes'),
+                          onPressed: () => setState(() {
+                            _finishState(stateNotesDone);
+                          }),
+                        )),
+                  ],
+                ),
+                Column(
+                  //Calendar
+                  children: [
+                    const SizedBox(height: 64),
+                    Container(
+                        width: double.infinity,
+                        child: DatePickerStatefulWidget('Execution date')),
+                    const SizedBox(height: 32),
+                    Container(
+                        width: double.infinity,
+                        child: TimePickerStatefulWidget('Execution time')),
+                    const SizedBox(height: 32),
+                    Container(
+                        width: double.infinity,
+                        child: RaisedButton(
+                          child: Text('Add on calendar'),
+                          onPressed: () => _finishState(stateCalendarDone),
+                        )),
+                    const SizedBox(height: 32),
+                  ],
+                ),
+                Container(
+                    //Later
+                    width: double.infinity,
+                    child: Padding(
+                        padding: EdgeInsets.only(top: 32),
+                        child: RaisedButton(
+                          child: Text('Add to later tasks'),
+                          onPressed: () => _finishState(stateLaterDone),
+                        ))),
+                IconTextWidget(
+                    Icons.list_alt, 'Project added to current projects!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(Icons.done, 'Task done!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(Icons.timelapse, 'Task added to current tasks!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(
+                    Icons.archive_rounded, 'Record added to archive!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(Icons.edit, 'Record added to notes!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(Icons.calendar_today, 'Task added on calendar!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(Icons.timelapse, 'Task added on later tasks!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(
+                    Icons.accessibility, 'Task added on await tasks!',
+                    iconColor: Colors.white, textColor: Colors.white),
+              ][_state]),
               width: double.infinity,
             ),
             snapshot.connectionState == ConnectionState.done && !_isFinishing
                 ? Container()
                 : Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ))
+                    padding: EdgeInsets.only(top: 8),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ))
           ]);
           if (_prevStates.length > 0) {
             children.add(const SizedBox(height: 16));
@@ -460,9 +534,9 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
             ),
             Center(
                 child: Text(
-                  "Loading...",
-                  style: TextStyle(fontSize: 24),
-                ))
+              "Loading...",
+              style: TextStyle(fontSize: 24),
+            ))
           ]);
         }
 
@@ -478,8 +552,8 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
 
         return Center(
             child: ListView(
-              children: children_padded,
-            ));
+          children: children_padded,
+        ));
       },
     );
   }
@@ -499,7 +573,7 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
   GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
   bool isLoading = false;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-  GlobalKey<RefreshIndicatorState>();
+      GlobalKey<RefreshIndicatorState>();
 
   double scrollExtent = 0;
 
@@ -521,7 +595,8 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
       scrollExtent = controller.position.maxScrollExtent;
     }
     if (!failed &&
-        (controller.position.pixels + (scrollExtent / 2)) >= controller.position.maxScrollExtent) {
+        (controller.position.pixels + (scrollExtent / 2)) >=
+            controller.position.maxScrollExtent) {
       startLoader();
     }
   }
@@ -539,7 +614,8 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
     print('_loadData');
     var records;
     try {
-      records = await REST.ApiService.getCrateRecords(offset: _allCrateRecords.length, limit: 10);
+      records = await REST.ApiService.getCrateRecords(
+          offset: _allCrateRecords.length, limit: 10);
     } catch (e) {
       print('Error');
       setState(() {
@@ -563,16 +639,16 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
         ),
         child: failed
             ? IconTextWidget(
-          Icons.clear,
-          'There is no records in crate',
-          textSize: 24,
-          iconColor: Theme.of(context).errorColor,
-        )
+                Icons.clear,
+                'There is no records in crate',
+                textSize: 24,
+                iconColor: Theme.of(context).errorColor,
+              )
             : Stack(
-          children: <Widget>[
-            _buildSuggestions(),
-          ],
-        ));
+                children: <Widget>[
+                  _buildSuggestions(),
+                ],
+              ));
   }
 
   Widget _buildRow(Record record) {
@@ -643,25 +719,26 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
   Widget _loader() {
     return isLoading
         ? Align(
-      child: Container(
-        width: 70.0,
-        height: 70.0,
-        child: Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Center(child: CircularProgressIndicator())),
-      ),
-      alignment: FractionalOffset.bottomCenter,
-    )
+            child: Container(
+              width: 70.0,
+              height: 70.0,
+              child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Center(child: CircularProgressIndicator())),
+            ),
+            alignment: FractionalOffset.bottomCenter,
+          )
         : SizedBox(
-      width: 0.0,
-      height: 0.0,
-    );
+            width: 0.0,
+            height: 0.0,
+          );
   }
 
   Future<bool> isLastElemLoaded() async {
     if (isLoading) return true;
     if (_allCrateRecords.length == 0) return false;
-    var list = (await REST.ApiService.getCrateRecords(offset: _allCrateRecords.length, limit: 1));
+    var list = (await REST.ApiService.getCrateRecords(
+        offset: _allCrateRecords.length, limit: 1));
     if (list.length == 0) return true;
     var last = list.elementAt(0);
     return last.id == _allCrateRecords[0].id ||
@@ -671,7 +748,8 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
   Future<bool> hasNewElements() async {
     if (isLoading) return false;
     if (_allCrateRecords.length == 0) return true;
-    var first = (await REST.ApiService.getCrateRecords(offset: 0, limit: 1)).elementAt(0);
+    var first = (await REST.ApiService.getCrateRecords(offset: 0, limit: 1))
+        .elementAt(0);
     return first.id != _allCrateRecords[0].id &&
         first.id != _allCrateRecords[_allCrateRecords.length - 1].id;
   }
@@ -718,25 +796,25 @@ Future<Record> fetchRecord(int id) async {
 // }
 
 // Future<Set<CrateRecord>> fetchRecords(int offset, int limit) async {
-  // print('Fetch records limit $limit offset $offset');
-  // final http.Response response = await http.get(
-  //   '$HOST/api/crate/get_records?offset=$offset&limit=$limit',
-  //   headers: <String, String>{
-  //     'Content-Type': 'charset=UTF-8',
-  //   },
-  // );
-  // if (response.statusCode == 200) {
-  //   Set<CrateRecord> ret = Set<CrateRecord>();
-  //   for (final i in jsonDecode(response.body)) {
-  //     print('Fetching $i');
-  //     ret.add(CrateRecord.fromJson(i));
-  //   }
-  //   return ret;
-  // } else {
-  //   var rb = response.body;
-  //   throw Exception(
-  //       'Failed to load crate record limit $limit offset $offset: $rb');
-  // }
+// print('Fetch records limit $limit offset $offset');
+// final http.Response response = await http.get(
+//   '$HOST/api/crate/get_records?offset=$offset&limit=$limit',
+//   headers: <String, String>{
+//     'Content-Type': 'charset=UTF-8',
+//   },
+// );
+// if (response.statusCode == 200) {
+//   Set<CrateRecord> ret = Set<CrateRecord>();
+//   for (final i in jsonDecode(response.body)) {
+//     print('Fetching $i');
+//     ret.add(CrateRecord.fromJson(i));
+//   }
+//   return ret;
+// } else {
+//   var rb = response.body;
+//   throw Exception(
+//       'Failed to load crate record limit $limit offset $offset: $rb');
+// }
 //   // return Set();
 // }
 
