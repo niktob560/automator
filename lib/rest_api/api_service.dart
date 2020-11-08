@@ -10,7 +10,7 @@ import 'models.dart';
 import 'package:automator/misc.dart' as misc;
 
 class URLS {
-  static const String BASE_URL = (false && kReleaseMode)
+  static const String BASE_URL = kReleaseMode
           ? 'https://gtd-nobodyhomie.ddns.net/api'
           : 'http://192.168.1.66:1234/api',
       CRATE = '/crate',
@@ -267,5 +267,6 @@ class ApiService {
   }
 
   static get expiringToken => _expiringToken;
+
   static get longToken => _longToken;
 }
