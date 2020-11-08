@@ -55,6 +55,7 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
   TextEditingController _executorContr = TextEditingController();
 
   _setState(int newState) async {
+    (await _record).note = _contr.text;
     if (_contr.text.isEmpty) {
       setState(() {
         _noteErrorMessage = 'Can`t be empty';
@@ -66,8 +67,8 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
       });
       return;
     }
-    (await _record).note = _contr.text;
     setState(() {
+      _noteErrorMessage = null;
       _prevStates.add(_state);
       _state = newState;
     });
@@ -105,40 +106,24 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
       _isFinishing = true;
     });
     var id = (await _record).id;
-    var oldNote = (await _record).note;
     var res;
     var msg;
     try {
       switch (newState) {
         case stateArchiveDone:
-          if (_contr.text != oldNote)
-            res = await ApiService.makeArchive(id, newNote: _contr.text);
-          else
-            res = await ApiService.makeArchive(id);
+          res = await ApiService.makeArchive(id, newNote: _contr.text);
           break;
         case stateNotesDone:
-          if (_contr.text != oldNote)
-            res = await ApiService.makeNote(id, newNote: _contr.text);
-          else
-            res = await ApiService.makeNote(id);
+          res = await ApiService.makeNote(id, newNote: _contr.text);
           break;
         case stateDone:
-          if (_contr.text != oldNote)
-            res = await ApiService.makeDone(id, newNote: _contr.text);
-          else
-            res = await ApiService.makeDone(id);
+          res = await ApiService.makeDone(id, newNote: _contr.text);
           break;
         case stateCurrentTaskDone:
-          if (_contr.text != oldNote)
-            res = await ApiService.makeCurrent(id, newNote: _contr.text);
-          else
-            res = await ApiService.makeCurrent(id);
+          res = await ApiService.makeCurrent(id, newNote: _contr.text);
           break;
         case stateLaterDone:
-          if (_contr.text != oldNote)
-            res = await ApiService.makeLater(id, newNote: _contr.text);
-          else
-            res = await ApiService.makeLater(id);
+          res = await ApiService.makeLater(id, newNote: _contr.text);
           break;
         case stateAwaitDone:
           print('$_date $_time ${_executorContr.text}');
@@ -154,18 +139,26 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
                 id,
                 DateTime(_date.year, _date.month, _date.day, _time.hour,
                     _time.minute),
-                _executorContr.text);
+                _executorContr.text,
+                newNote: _contr.text);
           }
           break;
         case stateProjectDone:
           var s = [_stepContr.text];
           res = await ApiService.makeProject(
-              id, _criteriaContr.text, _planContr.text, s);
+              id, _criteriaContr.text, _planContr.text, s,
+              newNote: _contr.text);
           break;
       }
     } catch (e) {
       print('$e');
     }
+    _criteriaContr.clear();
+    _executorContr.clear();
+    _planContr.clear();
+    _stepContr.clear();
+    _date = null;
+    _time = null;
     if (msg == null && (res == null || !res)) {
       print("Failed to send: query returned $res");
       msg = "Failed to send request" + (res != null ? "" : ": server error");
