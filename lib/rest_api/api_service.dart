@@ -5,8 +5,9 @@ import 'package:url_encoder/url_encoder.dart';
 
 import 'package:flutter/foundation.dart';
 
-
 import 'models.dart';
+
+import 'package:automator/misc.dart' as misc;
 
 class URLS {
   static const String BASE_URL = kReleaseMode? 'https://gtd-nobodyhomie.ddns.net/api' : 'http://192.168.1.66:1234/api',
@@ -16,13 +17,15 @@ class URLS {
                       DONE = '/done',
                       CURRENT = '/current',
                       LATER = '/later',
+                      AWAIT = '/await',
                       POST_RECORD = '/post_record',
                       GET_RECORDS = '/get_records',
                       MAKE_ARCHIVE = '/make_archive',
                       MAKE_NOTE = '/make_note',
                       MAKE_DONE = '/make_done',
                       MAKE_CURRENT = '/make_current',
-                      MAKE_LATER = '/make_later';
+                      MAKE_LATER = '/make_later',
+                      MAKE_AWAIT = '/make_await';
 }
 
 class ApiService {
@@ -215,6 +218,15 @@ class ApiService {
 
   static Future<bool> makeLater(int id, {String newNote}) async {
     var b = await sendPatch('${URLS.LATER}${URLS.MAKE_LATER}', newNote == null? null : jsonEncode(<String, String>{'note': newNote}), queryParams: <String, String> { 'id': '$id' });
+    return b != null? b['code'] == 0 : null;
+  }
+
+  static Future<bool> makeAwait(int id, DateTime deadline, String executor, {String newNote}) async {
+    var body = <String, String>{'deadline': misc.formatDateTimeForServer(deadline), 'executor': executor};
+    if (newNote != null) {
+      body['note'] = newNote;
+    }
+    var b = await sendPatch('${URLS.AWAIT}${URLS.MAKE_AWAIT}', jsonEncode(body), queryParams: <String, String> { 'id': '$id' });
     return b != null? b['code'] == 0 : null;
   }
 

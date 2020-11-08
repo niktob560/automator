@@ -6,6 +6,10 @@ final DateFormat  serverDateFormat = DateFormat("yyyy-MM-ddTHH:mm:ssZ"),
                   userDateTimeFormat = DateFormat("dd.MM.yyyy HH:mm"),
                   userDateFormat = DateFormat("dd.MM.yyyy");
 
+formatDateTimeForServer(DateTime dt) {
+  return '${dt.year}-${dt.month}-${dt.day}T${dt.hour}:${dt.minute}:${dt.second}Z';
+}
+
 class IconTextWidget extends StatelessWidget {
   final IconData icon;
   final String text;
@@ -123,19 +127,21 @@ class YesNoStatelessWidget extends StatelessWidget {
 
 class DatePickerStatefulWidget extends StatefulWidget {
   final String initialText;
+  final Function dateCallback;
 
-  DatePickerStatefulWidget(this.initialText, {Key key}) : super(key: key);
+  DatePickerStatefulWidget(this.initialText, {Key key, this.dateCallback}) : super(key: key);
 
   @override
   DatePickerStatefulWidgetState createState() =>
-      DatePickerStatefulWidgetState(initialText);
+      DatePickerStatefulWidgetState(initialText, dateCallback);
 }
 
 class DatePickerStatefulWidgetState extends State<DatePickerStatefulWidget> {
   final String initialText;
-  DateTime dateTime;
+  DateTime _dateTime;
+  final Function dateCallback;
 
-  DatePickerStatefulWidgetState(this.initialText);
+  DatePickerStatefulWidgetState(this.initialText, this.dateCallback);
 
   @override
   Widget build(BuildContext context) {
@@ -145,8 +151,8 @@ class DatePickerStatefulWidgetState extends State<DatePickerStatefulWidget> {
           padding: EdgeInsets.all(16),
           child: Text(
             initialText +
-                (dateTime != null
-                    ? (':\n' + userDateFormat.format(dateTime))
+                (_dateTime != null
+                    ? (':\n' + userDateFormat.format(_dateTime))
                     : ''),
             textAlign: TextAlign.center,
           ),
@@ -154,13 +160,15 @@ class DatePickerStatefulWidgetState extends State<DatePickerStatefulWidget> {
         onPressed: () async {
           DateTime d = await showDatePicker(
               context: context,
-              initialDate: dateTime == null ? DateTime.now() : dateTime,
+              initialDate: _dateTime == null ? DateTime.now() : _dateTime,
               firstDate: DateTime.now(),
               lastDate: DateTime.now().add(Duration(days: 365 * 200)));
           if (d != null) {
             setState(() {
-              dateTime = d;
+              _dateTime = d;
             });
+            if (dateCallback != null)
+              dateCallback(d);
           }
         });
   }
@@ -168,19 +176,21 @@ class DatePickerStatefulWidgetState extends State<DatePickerStatefulWidget> {
 
 class TimePickerStatefulWidget extends StatefulWidget {
   final String initialText;
+  final Function timeCallback;
 
-  TimePickerStatefulWidget(this.initialText, {Key key}) : super(key: key);
+  TimePickerStatefulWidget(this.initialText, {Key key, this.timeCallback}) : super(key: key);
 
   @override
   TimePickerStatefulWidgetState createState() =>
-      TimePickerStatefulWidgetState(initialText);
+      TimePickerStatefulWidgetState(initialText, timeCallback);
 }
 
 class TimePickerStatefulWidgetState extends State<TimePickerStatefulWidget> {
   final String initialText;
   TimeOfDay timeOfDay;
+  final Function timeCallback;
 
-  TimePickerStatefulWidgetState(this.initialText);
+  TimePickerStatefulWidgetState(this.initialText, this.timeCallback);
 
   @override
   Widget build(BuildContext context) {
@@ -202,6 +212,8 @@ class TimePickerStatefulWidgetState extends State<TimePickerStatefulWidget> {
             setState(() {
               timeOfDay = t;
             });
+            if (timeCallback != null)
+              timeCallback(t);
           }
         });
   }

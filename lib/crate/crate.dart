@@ -19,6 +19,10 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
   List<int> _prevStates = [];
   bool _isFinishing = false;
   Future<Record> _record;
+  DateTime _date;
+  TimeOfDay _time;
+  Set<String> _projectSteps;
+  String _errorMessage;
   static const int stateAnyToDo = 0,
       stateIsMyTask = 1,
       stateIsNow = 2,
@@ -40,9 +44,12 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
       stateArchiveDone = 18,
       stateNotesDone = 19,
       stateCalendarDone = 20,
-      stateLaterDone = 21;
+      stateLaterDone = 21,
+      stateAwaitDone = 22;
 
-  TextEditingController _contr = TextEditingController();
+  TextEditingController   _contr = TextEditingController();
+  TextEditingController   _executorContr = TextEditingController();
+  ValueNotifier<DateTime> _dateNotifier = ValueNotifier(null);
 
   _setState(int newState) {
     setState(() {
@@ -52,6 +59,9 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
   }
 
   _backState() {
+    _date = null;
+    _time = null;
+    _projectSteps = null;
     var s = _prevStates.last;
     _prevStates.remove(s);
     setState(() {
@@ -61,12 +71,14 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
 
   _finishState(int newState) async {
     setState(() {
+      _errorMessage = null;
       _isFinishing = true;
     });
     // String url = "/";
     var id = (await _record).id;
     var oldNote = (await _record).note;
     var res;
+    var msg;
     switch(newState) {
       case stateArchiveDone:
         if (_contr.text != oldNote)
@@ -98,14 +110,39 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
         else
           res = await REST.ApiService.makeLater(id);
         break;
+      case stateAwaitDone:
+        print('$_date $_time ${_executorContr.text}');
+        if (_date == null) {
+          msg = "Date must be set";
+        }
+        else if (_time == null) {
+          msg = "Time must be set";
+        }
+        else if (_executorContr.text == null || _executorContr.text.length == 0) {
+          msg = "Executor must be set";
+        }
+        else {
+          try {
+            res = await REST.ApiService.makeAwait(id, DateTime(
+                _date.year, _date.month, _date.day, _time.hour, _time.minute),
+                _executorContr.text);
+          }
+          catch (e) {
+            print('$e');
+          }
+        }
+        break;
     }
-    if (res == null || !res) {
+    if (msg == null && (res == null || !res)) {
+      print("Failed to send: query returned $res");
+      msg = "Failed to send request" + (res != null? "" : ": server error");
+    }
+    if (msg != null) {
       setState(() {
         _isFinishing = false;
       });
-      print("Failed to send: query returned $res");
       final snackBar = SnackBar(
-        content: Text("Failed to send request" + (res != null? "" : ": server error")),
+        content: Text(msg),
         behavior: SnackBarBehavior.floating,
       );
       Scaffold.of(context).showSnackBar(snackBar);
@@ -272,18 +309,19 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
                       children: [
                         const SizedBox(height: 16),
                         TextField(
-                          decoration: getInputDecoration('Executor', null),
+                          decoration: getInputDecoration('Executor', _errorMessage),
                           maxLines: null,
                           keyboardType: TextInputType.multiline,
+                          controller: _executorContr,
                         ),
                         const SizedBox(height: 32),
                         Container(
                             width: double.infinity,
-                            child: DatePickerStatefulWidget('Execution date')),
+                            child: DatePickerStatefulWidget('Execution date', dateCallback: (d) => _date = d)),
                         const SizedBox(height: 32),
                         Container(
                             width: double.infinity,
-                            child: TimePickerStatefulWidget('Execution time')),
+                            child: TimePickerStatefulWidget('Execution time', timeCallback: (t) => _time = t)),
                         const SizedBox(height: 32),
                         Container(
                           width: double.infinity,
@@ -293,7 +331,7 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
                                 style: TextStyle(color: Colors.white),
                               ),
                               color: Theme.of(context).accentColor,
-                              onPressed: () => _finishState(stateProjectDone)),
+                              onPressed: () => _executorContr.text.length > 0? _finishState(stateAwaitDone) : setState(() {_errorMessage = 'Executor must be set';})),
                         ),
                       ],
                     ),
@@ -375,6 +413,8 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
                     IconTextWidget(Icons.calendar_today, 'Task added on calendar!',
                         iconColor: Colors.white, textColor: Colors.white),
                     IconTextWidget(Icons.timelapse, 'Task added on later tasks!',
+                        iconColor: Colors.white, textColor: Colors.white),
+                    IconTextWidget(Icons.accessibility, 'Task added on await tasks!',
                         iconColor: Colors.white, textColor: Colors.white),
                   ][_state]),
               width: double.infinity,
