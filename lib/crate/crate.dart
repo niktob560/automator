@@ -72,6 +72,7 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
         // url = url + "archive/make_archive?id=$id";
         break;
       case stateNotesDone:
+        res = await REST.ApiService.makeNote(id);
         // url = url + "notes/make_note?id=$id";
         break;
       case stateDone:

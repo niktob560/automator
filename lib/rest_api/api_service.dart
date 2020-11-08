@@ -199,7 +199,7 @@ class ApiService {
   }
   
   static Future<bool> makeNote(int id) async {
-    var b = await sendPatch('${URLS.NOTES}${URLS.MAKE_NOTE}', jsonEncode(<String, String> { 'id': '$id' }));
+    var b = await sendPatch('${URLS.NOTES}${URLS.MAKE_NOTE}', null, queryParams: <String, String> { 'id': '$id' });
     return b != null? b['code'] == 0 : null;
   }
 
