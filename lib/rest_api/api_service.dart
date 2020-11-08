@@ -197,9 +197,24 @@ class ApiService {
     print('getLastCrateRecords $b');
     return Record.fromJson(b[0]);
   }
-  
+
   static Future<bool> makeNote(int id, {String newNote}) async {
     var b = await sendPatch('${URLS.NOTES}${URLS.MAKE_NOTE}', newNote == null? null : jsonEncode(<String, String>{'note': newNote}), queryParams: <String, String> { 'id': '$id' });
+    return b != null? b['code'] == 0 : null;
+  }
+
+  static Future<bool> makeDone(int id, {String newNote}) async {
+    var b = await sendPatch('${URLS.DONE}${URLS.MAKE_DONE}', newNote == null? null : jsonEncode(<String, String>{'note': newNote}), queryParams: <String, String> { 'id': '$id' });
+    return b != null? b['code'] == 0 : null;
+  }
+
+  static Future<bool> makeCurrent(int id, {String newNote}) async {
+    var b = await sendPatch('${URLS.CURRENT}${URLS.MAKE_CURRENT}', newNote == null? null : jsonEncode(<String, String>{'note': newNote}), queryParams: <String, String> { 'id': '$id' });
+    return b != null? b['code'] == 0 : null;
+  }
+
+  static Future<bool> makeLater(int id, {String newNote}) async {
+    var b = await sendPatch('${URLS.LATER}${URLS.MAKE_LATER}', newNote == null? null : jsonEncode(<String, String>{'note': newNote}), queryParams: <String, String> { 'id': '$id' });
     return b != null? b['code'] == 0 : null;
   }
 

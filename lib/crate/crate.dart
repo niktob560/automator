@@ -73,42 +73,39 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
           res = await REST.ApiService.makeArchive(id, newNote: _contr.text);
         else
           res = await REST.ApiService.makeArchive(id);
-        // url = url + "archive/make_archive?id=$id";
         break;
       case stateNotesDone:
         if (_contr.text != oldNote)
           res = await REST.ApiService.makeNote(id, newNote: _contr.text);
         else
           res = await REST.ApiService.makeNote(id);
-        // url = url + "notes/make_note?id=$id";
         break;
       case stateDone:
-        // url = url + "done/make_done?id=$id";
+        if (_contr.text != oldNote)
+          res = await REST.ApiService.makeDone(id, newNote: _contr.text);
+        else
+          res = await REST.ApiService.makeDone(id);
         break;
       case stateCurrentTaskDone:
-        // url = url + "current/make_current?id=$id";
+        if (_contr.text != oldNote)
+          res = await REST.ApiService.makeCurrent(id, newNote: _contr.text);
+        else
+          res = await REST.ApiService.makeCurrent(id);
         break;
       case stateLaterDone:
-        // url = url + "later/make_later?id=$id";
+        if (_contr.text != oldNote)
+          res = await REST.ApiService.makeLater(id, newNote: _contr.text);
+        else
+          res = await REST.ApiService.makeLater(id);
         break;
     }
-    // url = HOST + "/api" + url;
-    // try {
-    //   var resp = await http.patch(url);
-    //   print(resp);
-    //   if (resp.statusCode != 200) {
-    //     print(resp.statusCode);
-    //     throw Exception(resp.body);
-    //   }
-    // }
-    // catch (e) {
     if (res == null || !res) {
       setState(() {
         _isFinishing = false;
       });
-      print("Failed to send!");
+      print("Failed to send: query returned $res");
       final snackBar = SnackBar(
-        content: Text("Failed to send request"),
+        content: Text("Failed to send request" + (res != null? "" : ": server error")),
         behavior: SnackBarBehavior.floating,
       );
       Scaffold.of(context).showSnackBar(snackBar);
