@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:morpheus/morpheus.dart';
-import 'dart:convert';
 
 import 'day_night_gradients.dart';
 
@@ -13,8 +12,6 @@ import 'await/await.dart' as wait;
 import 'notes/notes.dart' as notes;
 import 'archive/archive.dart' as archive;
 import 'crate/crate.dart' as crate;
-import 'misc.dart';
-import 'package:automator/rest_api/api_service.dart';
 
 class RootStatefulWidget extends StatefulWidget {
   RootStatefulWidget({Key key}) : super(key: key);
@@ -215,10 +212,6 @@ class _MainStatefulWidgetState extends State<_MainStatefulWidget> {
     });
   }
 
-  final TextEditingController _controller = TextEditingController();
-  bool _progressBarActive = false;
-  bool _crateCreateValid = true;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -227,92 +220,8 @@ class _MainStatefulWidgetState extends State<_MainStatefulWidget> {
         child: Padding(
           child: Center(
               child: [
-            Center(
-              child: ListView(
-                padding: const EdgeInsets.only(right: 32, left: 32),
-                children: [
-                  const SizedBox(height: 32),
-                  Text(
-                    'Add a record',
-                    style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  TextField(
-                    decoration: getInputDecoration('Record',
-                        _crateCreateValid ? null : 'Record Can\'t Be Empty'),
-                    maxLines: null,
-                    keyboardType: TextInputType.multiline,
-                    controller: _controller,
-                  ),
-                  const SizedBox(height: 16),
-                  RaisedButton(
-                    color: Theme.of(context).accentColor,
-                    child: Text(
-                      'Add',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    onPressed: () async {
-                      () async {
-                        var message;
-                        try {
-                          setState(() {
-                            if (_controller.text.isEmpty) {
-                              _crateCreateValid = false;
-                            } else {
-                              _crateCreateValid = true;
-                            }
-                          });
-                          if (!_crateCreateValid) return;
-                          setState(() {
-                            _progressBarActive = true;
-                          });
-                          var r = await ApiService.postCrate(_controller.text);
-                          if (r != null) {
-                            if (r) {
-                              //success
-                              message = 'Successfuly created';
-                              _controller.text = '';
-                            } else {
-                              //what?
-                              message = 'An error occured';
-                            }
-                          } else {
-                            //no connection
-                            print('Query returned null');
-                            message = 'No connection to the server';
-                          }
-                        } catch (e) {
-                          print('$e');
-                          message = 'No connection to the server';
-                        }
-                        setState(() {
-                          _progressBarActive = false;
-                        });
-                        final snackBar = SnackBar(
-                          content: Text(message),
-                          behavior: SnackBarBehavior.floating,
-                        );
-                        Scaffold.of(context).showSnackBar(snackBar);
-                      }();
-                    },
-                  ),
-                  Center(
-                    child: _progressBarActive == true
-                        ? const CircularProgressIndicator()
-                        : new Container(),
-                  ),
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
-            Center(
-              child: crate.SortingStatefulWidget(),
-            ),
+            crate.CrateAddStatefulWidget(),
+            crate.SortingStatefulWidget(),
             crate.AllCrateStatefulWidget(),
           ].elementAt(_selectedIndex)),
           padding: EdgeInsets.zero,
