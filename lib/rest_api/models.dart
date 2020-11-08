@@ -19,7 +19,7 @@ class Record {
     return 'CrateRecord{_note: $_note, _creationDate: $_creationDate, _id: $_id}';
   }
   factory Record.fromJson(Map<String, dynamic> json) {
-    return Record('${json['note']} ${json['id']}',
+    return Record('${json['note']}',
         id: json['id'],
         creationDate: serverDateFormat
             .parse(json['creation_date'])

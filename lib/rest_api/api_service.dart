@@ -177,8 +177,8 @@ class ApiService {
     return b['code'] == 0;
   }
 
-  static Future<bool> makeArchive(int id) async {
-    var b = await sendPatch('${URLS.ARCHIVE}${URLS.MAKE_ARCHIVE}', null, queryParams: <String, String> { 'id': '$id' });
+  static Future<bool> makeArchive(int id, {String newNote}) async {
+    var b = await sendPatch('${URLS.ARCHIVE}${URLS.MAKE_ARCHIVE}', newNote == null? null : jsonEncode(<String, String>{'note': newNote}), queryParams: <String, String> { 'id': '$id' });
     return b != null? b['code'] == 0 : null;
   }
 
@@ -198,8 +198,8 @@ class ApiService {
     return Record.fromJson(b[0]);
   }
   
-  static Future<bool> makeNote(int id) async {
-    var b = await sendPatch('${URLS.NOTES}${URLS.MAKE_NOTE}', null, queryParams: <String, String> { 'id': '$id' });
+  static Future<bool> makeNote(int id, {String newNote}) async {
+    var b = await sendPatch('${URLS.NOTES}${URLS.MAKE_NOTE}', newNote == null? null : jsonEncode(<String, String>{'note': newNote}), queryParams: <String, String> { 'id': '$id' });
     return b != null? b['code'] == 0 : null;
   }
 

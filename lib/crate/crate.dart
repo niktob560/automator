@@ -65,14 +65,21 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
     });
     // String url = "/";
     var id = (await _record).id;
+    var oldNote = (await _record).note;
     var res;
     switch(newState) {
       case stateArchiveDone:
-        res = await REST.ApiService.makeArchive(id);
+        if (_contr.text != oldNote)
+          res = await REST.ApiService.makeArchive(id, newNote: _contr.text);
+        else
+          res = await REST.ApiService.makeArchive(id);
         // url = url + "archive/make_archive?id=$id";
         break;
       case stateNotesDone:
-        res = await REST.ApiService.makeNote(id);
+        if (_contr.text != oldNote)
+          res = await REST.ApiService.makeNote(id, newNote: _contr.text);
+        else
+          res = await REST.ApiService.makeNote(id);
         // url = url + "notes/make_note?id=$id";
         break;
       case stateDone:
