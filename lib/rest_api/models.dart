@@ -14,7 +14,6 @@ class Record {
   String get note => _note;
   int get id => _id;
 
-
   set note(String value) {
     _note = value;
   }

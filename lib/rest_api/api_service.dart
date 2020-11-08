@@ -21,6 +21,7 @@ class URLS {
       LATER = '/later',
       AWAIT = '/await',
       PROJECTS = '/projects',
+      CALENDAR = '/calendar',
       POST_RECORD = '/post_record',
       GET_RECORDS = '/get_records',
       MAKE_ARCHIVE = '/make_archive',
@@ -29,7 +30,8 @@ class URLS {
       MAKE_CURRENT = '/make_current',
       MAKE_LATER = '/make_later',
       MAKE_AWAIT = '/make_await',
-      MAKE_PROJECT = '/make_project';
+      MAKE_PROJECT = '/make_project',
+      MAKE_CALENDAR = '/make_calendar';
 }
 
 class ApiService {
@@ -262,6 +264,20 @@ class ApiService {
     }
     var b = await sendPatch(
         '${URLS.PROJECTS}${URLS.MAKE_PROJECT}', jsonEncode(body),
+        queryParams: <String, String>{'id': '$id'});
+    return b != null ? b['code'] == 0 : null;
+  }
+
+  static Future<bool> makeCalendar(int id, DateTime deadline,
+      {String newNote}) async {
+    var body = <String, dynamic>{
+      'deadline': misc.formatDateTimeForServer(deadline)
+    };
+    if (newNote != null) {
+      body['note'] = newNote;
+    }
+    var b = await sendPatch(
+        '${URLS.CALENDAR}${URLS.MAKE_CALENDAR}', jsonEncode(body),
         queryParams: <String, String>{'id': '$id'});
     return b != null ? b['code'] == 0 : null;
   }

@@ -4,7 +4,6 @@ import 'package:automator/rest_api/api_service.dart';
 import 'package:automator/rest_api/models.dart';
 import 'package:automator/day_night_gradients.dart';
 
-
 class AllCrateStatefulWidget extends StatefulWidget {
   AllCrateStatefulWidget({Key key}) : super(key: key);
 
@@ -19,7 +18,7 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
   GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
   bool isLoading = false;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-  GlobalKey<RefreshIndicatorState>();
+      GlobalKey<RefreshIndicatorState>();
 
   double scrollExtent = 0;
 
@@ -85,16 +84,16 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
         ),
         child: failed
             ? IconTextWidget(
-          Icons.clear,
-          'There is no records in crate',
-          textSize: 24,
-          iconColor: Theme.of(context).errorColor,
-        )
+                Icons.clear,
+                'There is no records in crate',
+                textSize: 24,
+                iconColor: Theme.of(context).errorColor,
+              )
             : Stack(
-          children: <Widget>[
-            _buildSuggestions(),
-          ],
-        ));
+                children: <Widget>[
+                  _buildSuggestions(),
+                ],
+              ));
   }
 
   Widget _buildRow(Record record) {
@@ -165,19 +164,19 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
   Widget _loader() {
     return isLoading
         ? Align(
-      child: Container(
-        width: 70.0,
-        height: 70.0,
-        child: Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Center(child: CircularProgressIndicator())),
-      ),
-      alignment: FractionalOffset.bottomCenter,
-    )
+            child: Container(
+              width: 70.0,
+              height: 70.0,
+              child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Center(child: CircularProgressIndicator())),
+            ),
+            alignment: FractionalOffset.bottomCenter,
+          )
         : SizedBox(
-      width: 0.0,
-      height: 0.0,
-    );
+            width: 0.0,
+            height: 0.0,
+          );
   }
 
   Future<bool> isLastElemLoaded() async {
@@ -194,8 +193,8 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
   Future<bool> hasNewElements() async {
     if (isLoading) return false;
     if (_allCrateRecords.length == 0) return true;
-    var first = (await ApiService.getCrateRecords(offset: 0, limit: 1))
-        .elementAt(0);
+    var first =
+        (await ApiService.getCrateRecords(offset: 0, limit: 1)).elementAt(0);
     return first.id != _allCrateRecords[0].id &&
         first.id != _allCrateRecords[_allCrateRecords.length - 1].id;
   }

@@ -12,13 +12,11 @@ class SortingStatefulWidget extends StatefulWidget {
 
 class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
   var _state = 0;
-  GlobalKey<DatePickerStatefulWidgetState> _datePickerKey = GlobalKey();
   List<int> _prevStates = [];
   bool _isFinishing = false;
   Future<Record> _record;
   DateTime _date;
   TimeOfDay _time;
-  Set<String> _projectSteps = Set();
   String _executorErrorMessage,
       _finishCriteriaErrorMessage,
       _planErrorMessage,
@@ -77,7 +75,6 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
   _backState() {
     _date = null;
     _time = null;
-    _projectSteps = Set();
     var s = _prevStates.last;
     _prevStates.remove(s);
     setState(() {
@@ -149,6 +146,20 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
               id, _criteriaContr.text, _planContr.text, s,
               newNote: _contr.text);
           break;
+        case stateCalendarDone:
+          print('$_date $_time ');
+          if (_date == null) {
+            msg = "Date must be set";
+          } else if (_time == null) {
+            msg = "Time must be set";
+          } else {
+            res = await ApiService.makeCalendar(
+                id,
+                DateTime(_date.year, _date.month, _date.day, _time.hour,
+                    _time.minute),
+                newNote: _contr.text);
+          }
+          break;
       }
     } catch (e) {
       print('$e');
@@ -161,7 +172,8 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
     _time = null;
     if (msg == null && (res == null || !res)) {
       print("Failed to send: query returned $res");
-      msg = "Failed to send request" + (res != null ? "" : ": server error");
+      msg =
+          "Failed to send request" + (res != null ? "" : ": connection error");
     }
     if (msg != null) {
       setState(() {
@@ -179,7 +191,7 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
       _state = newState;
       _isFinishing = false;
     });
-    _fetchRecord();
+    _stateReset();
   }
 
   @override
@@ -188,11 +200,8 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
     _record = ApiService.getLastCrateRecords();
   }
 
-  _fetchRecord() {
-    _stateResetter();
-  }
-
-  Future<void> _stateResetter() async {
+  _stateReset() async {
+    _contr.text = (await _record).note;
     await sleep1();
     setState(() {
       _record = ApiService.getLastCrateRecords();
@@ -448,11 +457,13 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
                     const SizedBox(height: 64),
                     Container(
                         width: double.infinity,
-                        child: DatePickerStatefulWidget('Execution date')),
+                        child: DatePickerStatefulWidget('Execution date',
+                            dateCallback: (d) => _date = d)),
                     const SizedBox(height: 32),
                     Container(
                         width: double.infinity,
-                        child: TimePickerStatefulWidget('Execution time')),
+                        child: TimePickerStatefulWidget('Execution time',
+                            timeCallback: (t) => _time = t)),
                     const SizedBox(height: 32),
                     Container(
                         width: double.infinity,
