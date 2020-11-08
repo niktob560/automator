@@ -81,8 +81,7 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
         _noteErrorMessage = 'Can`t be empty';
       });
       return;
-    }
-    else if (_contr.text.length < 4) {
+    } else if (_contr.text.length < 4) {
       setState(() {
         _noteErrorMessage = 'Must have at least 4 chars';
       });
@@ -323,10 +322,10 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
                               if (_stepContr.text.length == 0) {
                                 valid = false;
                                 _firstStepErrorMessage = 'Can`t be empty';
-                              }
-                              else if (_stepContr.text.length < 4) {
+                              } else if (_stepContr.text.length < 4) {
                                 valid = false;
-                                _firstStepErrorMessage = 'Must contain at least 4 chars';
+                                _firstStepErrorMessage =
+                                    'Must contain at least 4 chars';
                               }
                             });
                             if (valid) _finishState(stateProjectDone);

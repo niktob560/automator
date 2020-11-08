@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'day_night_gradients.dart';
 
-final DateFormat  serverDateFormat = DateFormat("yyyy-MM-ddTHH:mm:ssZ"),
-                  userDateTimeFormat = DateFormat("dd.MM.yyyy HH:mm"),
-                  userDateFormat = DateFormat("dd.MM.yyyy");
+final DateFormat serverDateFormat = DateFormat("yyyy-MM-ddTHH:mm:ssZ"),
+    userDateTimeFormat = DateFormat("dd.MM.yyyy HH:mm"),
+    userDateFormat = DateFormat("dd.MM.yyyy");
 
 formatDateTimeForServer(DateTime dt) {
   return '${dt.year}-${dt.month}-${dt.day}T${dt.hour}:${dt.minute}:${dt.second}Z';
@@ -32,8 +32,7 @@ class IconTextWidget extends StatelessWidget {
         ),
         Text(text,
             style: TextStyle(
-              color:
-              textColor != null ? textColor : Colors.white,
+              color: textColor != null ? textColor : Colors.white,
               fontSize: (textSize != null ? textSize : 24) * 1.0,
             ))
       ],
@@ -47,13 +46,13 @@ class YesNoStatelessWidget extends StatelessWidget {
 
   YesNoStatelessWidget(
       {Key key,
-        this.yesFunction,
-        this.noFunction,
-        this.question,
-        this.backFunction,
-        this.yesText,
-        this.noText,
-        this.backText})
+      this.yesFunction,
+      this.noFunction,
+      this.question,
+      this.backFunction,
+      this.yesText,
+      this.noText,
+      this.backText})
       : super(key: key);
 
   @override
@@ -109,16 +108,16 @@ class YesNoStatelessWidget extends StatelessWidget {
         ),
         backFunction != null
             ? Container(
-          width: double.infinity,
-          child: RaisedButton(
-            child: Text(
-              backText != null ? backText : 'Back',
-              style: TextStyle(color: Colors.white),
-            ),
-            color: Theme.of(context).accentColor,
-            onPressed: backFunction,
-          ),
-        )
+                width: double.infinity,
+                child: RaisedButton(
+                  child: Text(
+                    backText != null ? backText : 'Back',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  color: Theme.of(context).accentColor,
+                  onPressed: backFunction,
+                ),
+              )
             : Container()
       ],
     );
@@ -129,7 +128,8 @@ class DatePickerStatefulWidget extends StatefulWidget {
   final String initialText;
   final Function dateCallback;
 
-  DatePickerStatefulWidget(this.initialText, {Key key, this.dateCallback}) : super(key: key);
+  DatePickerStatefulWidget(this.initialText, {Key key, this.dateCallback})
+      : super(key: key);
 
   @override
   DatePickerStatefulWidgetState createState() =>
@@ -167,8 +167,7 @@ class DatePickerStatefulWidgetState extends State<DatePickerStatefulWidget> {
             setState(() {
               _dateTime = d;
             });
-            if (dateCallback != null)
-              dateCallback(d);
+            if (dateCallback != null) dateCallback(d);
           }
         });
   }
@@ -178,7 +177,8 @@ class TimePickerStatefulWidget extends StatefulWidget {
   final String initialText;
   final Function timeCallback;
 
-  TimePickerStatefulWidget(this.initialText, {Key key, this.timeCallback}) : super(key: key);
+  TimePickerStatefulWidget(this.initialText, {Key key, this.timeCallback})
+      : super(key: key);
 
   @override
   TimePickerStatefulWidgetState createState() =>
@@ -212,8 +212,7 @@ class TimePickerStatefulWidgetState extends State<TimePickerStatefulWidget> {
             setState(() {
               timeOfDay = t;
             });
-            if (timeCallback != null)
-              timeCallback(t);
+            if (timeCallback != null) timeCallback(t);
           }
         });
   }

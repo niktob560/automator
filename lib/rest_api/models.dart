@@ -18,6 +18,7 @@ class Record {
   String toString() {
     return 'CrateRecord{_note: $_note, _creationDate: $_creationDate, _id: $_id}';
   }
+
   factory Record.fromJson(Map<String, dynamic> json) {
     return Record('${json['note']}',
         id: json['id'],
