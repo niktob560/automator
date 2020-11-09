@@ -30,4 +30,12 @@ class Record {
             .parse(json['creation_date'])
             .add(DateTime.now().timeZoneOffset));
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Record && runtimeType == other.runtimeType && _id == other._id;
+
+  @override
+  int get hashCode => _id.hashCode;
 }
