@@ -13,6 +13,7 @@ import 'notes/notes.dart' as notes;
 import 'archive/archive.dart' as archive;
 import 'crate/crate.dart' as crate;
 
+
 class RootStatefulWidget extends StatefulWidget {
   RootStatefulWidget({Key key}) : super(key: key);
 
@@ -165,7 +166,7 @@ class _RootStatefulWidgetState extends State<RootStatefulWidget> {
                 ),
                 onTap: () {
                   setState(() {
-                    mainWidget = notes.NotesStatefulWidget();
+                    mainWidget = notes.NotesWidget();
                   });
                   Navigator.pop(context);
                 },

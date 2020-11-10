@@ -194,7 +194,16 @@ class ApiService {
   static Future<Set<Record>> getCrateRecords({limit = 100, offset = 0}) async {
     var b = await sendGet('${URLS.CRATE}${URLS.GET_RECORDS}',
         <String, String>{'limit': '$limit', 'offset': '$offset'});
-    print('getCrateRecords $b');
+    Set<Record> ret = Set();
+    for (var i in b) {
+      ret.add(Record.fromJson(i));
+    }
+    return ret;
+  }
+
+  static Future<Set<Record>> getNotesRecords({limit = 100, offset = 0}) async {
+    var b = await sendGet('${URLS.NOTES}${URLS.GET_RECORDS}',
+        <String, String>{'limit': '$limit', 'offset': '$offset'});
     Set<Record> ret = Set();
     for (var i in b) {
       ret.add(Record.fromJson(i));
@@ -205,7 +214,6 @@ class ApiService {
   static Future<Record> getLastCrateRecords() async {
     var b = (await sendGet('${URLS.CRATE}${URLS.GET_RECORDS}',
         <String, String>{'limit': '1', 'offset': '0'}));
-    print('getLastCrateRecords $b');
     return Record.fromJson(b[0]);
   }
 
