@@ -5,6 +5,9 @@ import 'package:automator/rest_api/models.dart';
 import 'package:automator/endless_list.dart';
 import 'package:automator/misc.dart';
 
+const title = 'Notes';
+const icon = Icons.edit;
+
 class NotesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => EndlessListStatefulWidget<Record>(

@@ -157,11 +157,11 @@ class _RootStatefulWidgetState extends State<RootStatefulWidget> {
               ),
               ListTile(
                 leading: Icon(
-                  Icons.note,
+                  notes.icon,
                   color: Colors.white60,
                 ),
                 title: Text(
-                  'Notes',
+                  notes.title,
                   style: TextStyle(color: Colors.white),
                 ),
                 onTap: () {

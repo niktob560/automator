@@ -3,6 +3,8 @@ import 'package:automator/misc.dart';
 import 'package:automator/rest_api/api_service.dart';
 import 'package:automator/rest_api/models.dart';
 
+import 'package:automator/notes/notes.dart' as notes;
+
 class SortingStatefulWidget extends StatefulWidget {
   SortingStatefulWidget({Key key}) : super(key: key);
 
@@ -493,7 +495,7 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
                 IconTextWidget(
                     Icons.archive_rounded, 'Record added to archive!',
                     iconColor: Colors.white, textColor: Colors.white),
-                IconTextWidget(Icons.edit, 'Record added to notes!',
+                IconTextWidget(notes.icon, 'Record added to notes!',
                     iconColor: Colors.white, textColor: Colors.white),
                 IconTextWidget(Icons.calendar_today, 'Task added on calendar!',
                     iconColor: Colors.white, textColor: Colors.white),
