@@ -4,6 +4,13 @@ import 'package:automator/rest_api/api_service.dart';
 import 'package:automator/rest_api/models.dart';
 
 import 'package:automator/notes/notes.dart' as notes;
+import 'package:automator/current/current.dart' as current;
+import 'package:automator/later/later.dart' as later;
+import 'package:automator/projects/projects.dart' as projects;
+import 'package:automator/done/done.dart' as done;
+import 'package:automator/calendar/calendar.dart' as calendar;
+import 'package:automator/archive/archive.dart' as archive;
+import 'package:automator/await/await.dart' as wait;
 
 class SortingStatefulWidget extends StatefulWidget {
   SortingStatefulWidget({Key key}) : super(key: key);
@@ -486,23 +493,22 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
                           onPressed: () => _finishState(stateLaterDone),
                         ))),
                 IconTextWidget(
-                    Icons.list_alt, 'Project added to current projects!',
+                    projects.meta.icon, 'Project added to current projects!',
                     iconColor: Colors.white, textColor: Colors.white),
-                IconTextWidget(Icons.done, 'Task done!',
-                    iconColor: Colors.white, textColor: Colors.white),
-                IconTextWidget(Icons.timelapse, 'Task added to current tasks!',
+                IconTextWidget(done.meta.icon, 'Task done!',
                     iconColor: Colors.white, textColor: Colors.white),
                 IconTextWidget(
-                    Icons.archive_rounded, 'Record added to archive!',
+                    current.meta.icon, 'Task added to current tasks!',
                     iconColor: Colors.white, textColor: Colors.white),
-                IconTextWidget(notes.icon, 'Record added to notes!',
+                IconTextWidget(archive.meta.icon, 'Record added to archive!',
                     iconColor: Colors.white, textColor: Colors.white),
-                IconTextWidget(Icons.calendar_today, 'Task added on calendar!',
+                IconTextWidget(notes.meta.icon, 'Record added to notes!',
                     iconColor: Colors.white, textColor: Colors.white),
-                IconTextWidget(Icons.timelapse, 'Task added on later tasks!',
+                IconTextWidget(calendar.meta.icon, 'Task added on calendar!',
                     iconColor: Colors.white, textColor: Colors.white),
-                IconTextWidget(
-                    Icons.accessibility, 'Task added on await tasks!',
+                IconTextWidget(later.meta.icon, 'Task added on later tasks!',
+                    iconColor: Colors.white, textColor: Colors.white),
+                IconTextWidget(wait.meta.icon, 'Task added on await tasks!',
                     iconColor: Colors.white, textColor: Colors.white),
               ][_state]),
               width: double.infinity,

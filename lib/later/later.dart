@@ -5,8 +5,10 @@ import 'package:automator/rest_api/models.dart';
 import 'package:automator/endless_list.dart';
 import 'package:automator/misc.dart';
 
-const title = 'Later';
-const icon = Icons.timelapse;
+import 'package:automator/meta.dart';
+
+final meta =
+Meta(Icons.weekend, 'Later', LaterWidget());
 
 class LaterWidget extends StatelessWidget {
   @override
@@ -14,7 +16,7 @@ class LaterWidget extends StatelessWidget {
       (already) => ApiService.getLaterRecords(limit: 10, offset: already),
       (context, elem) => _buildRow(elem),
       Center(
-          child: IconTextWidget(icon, 'There is no later records',
+          child: IconTextWidget(meta.icon, 'There is no later records',
               iconColor: Colors.white, textSize: 48)));
 
   Widget _buildRow(Record record) {

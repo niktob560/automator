@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:automator/meta.dart';
+
+final meta =
+Meta(Icons.library_books, 'Projects', ProjectsStatefulWidget());
+
 class ProjectsStatefulWidget extends StatefulWidget {
   ProjectsStatefulWidget({Key key}) : super(key: key);
 
@@ -10,6 +15,6 @@ class ProjectsStatefulWidget extends StatefulWidget {
 class ProjectsStatefulWidgetState extends State<ProjectsStatefulWidget> {
   @override
   Widget build(BuildContext context) {
-    return Text('Projects');
+    return Text(meta.title);
   }
 }

@@ -11,8 +11,10 @@ import 'crate_sort.dart';
 import 'crate_list.dart';
 import 'crate_add.dart';
 
-const icon = Icons.apps;
-const title = 'Crate';
+import 'package:automator/meta.dart';
+
+final meta = Meta(
+  Icons.apps, 'Crate', Crate());
 
 
 class Crate extends StatefulWidget {

@@ -9,7 +9,9 @@ import 'await/await.dart' as wait;
 import 'notes/notes.dart' as notes;
 import 'archive/archive.dart' as archive;
 import 'crate/crate.dart' as crate;
+import 'done/done.dart' as done;
 
+final metas = [crate.meta, current.meta, calendar.meta, later.meta, projects.meta, wait.meta, notes.meta, done.meta, archive.meta];
 
 class RootStatefulWidget extends StatefulWidget {
   RootStatefulWidget({Key key}) : super(key: key);
@@ -19,20 +21,43 @@ class RootStatefulWidget extends StatefulWidget {
 }
 
 class _RootStatefulWidgetState extends State<RootStatefulWidget> {
-  Widget mainWidget = crate.Crate();
+  Widget _mainWidget = metas[0].content;
 
-  int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
+    final drawerList = <Widget>[
+      DrawerHeader(
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor,
+        ),
+        child: Text(
+          a.title,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+          ),
+        ),
+      )
+    ];
+    for (var i in metas) {
+      drawerList.add(
+        ListTile(
+          leading: Icon(
+            i.icon,
+            color: Colors.white60,
+          ),
+          title: Text(
+            i.title,
+            style: TextStyle(color: Colors.white),
+          ),
+          onTap: () {
+            setState(() => _mainWidget = i.content);
+            Navigator.pop(context);
+          },
+        )
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text(a.title),
@@ -41,153 +66,12 @@ class _RootStatefulWidgetState extends State<RootStatefulWidget> {
         child: Container(
           child: ListView(
             padding: EdgeInsets.zero,
-            children: <Widget>[
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                ),
-                child: Text(
-                  a.title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                  ),
-                ),
-              ),
-              ListTile( //TODO: move to child
-                leading: Icon(
-                  crate.icon,
-                  color: Colors.white60,
-                ),
-                title: Text(
-                  crate.title,
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {
-                  setState(() {
-                    mainWidget = crate.Crate();
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.now_widgets,
-                  color: Colors.white60,
-                ),
-                title: Text(
-                  'Now',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {
-                  setState(() {
-                    mainWidget = current.CurrentTasksStatefulWidget();
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.calendar_today,
-                  color: Colors.white60,
-                ),
-                title: Text(
-                  'Calendar',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {
-                  setState(() {
-                    mainWidget = calendar.CalendarStatefulWidget();
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  later.icon,
-                  color: Colors.white60,
-                ),
-                title: Text(
-                  later.title,
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {
-                  setState(() {
-                    mainWidget = later.LaterWidget();
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.list,
-                  color: Colors.white60,
-                ),
-                title: Text(
-                  'Projects',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {
-                  setState(() {
-                    mainWidget = projects.ProjectsStatefulWidget();
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.timelapse,
-                  color: Colors.white60,
-                ),
-                title: Text(
-                  'Await',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {
-                  setState(() {
-                    mainWidget = wait.AwaitStatefulWidget();
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  notes.icon,
-                  color: Colors.white60,
-                ),
-                title: Text(
-                  notes.title,
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {
-                  setState(() {
-                    mainWidget = notes.NotesWidget();
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.archive,
-                  color: Colors.white60,
-                ),
-                title: Text(
-                  'Archive',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {
-                  setState(() {
-                    mainWidget = archive.ArchiveStatefulWidget();
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-            ],
+            children: drawerList
           ),
           decoration: BoxDecoration(color: Theme.of(context).backgroundColor),
         ),
       ),
-      body: mainWidget,
+      body: _mainWidget,
     );
   }
 }

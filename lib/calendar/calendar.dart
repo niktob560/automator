@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'package:automator/meta.dart';
+
+final meta =
+Meta(Icons.calendar_today, 'Calendar', CalendarStatefulWidget());
+
+
 class CalendarStatefulWidget extends StatefulWidget {
   CalendarStatefulWidget({Key key}) : super(key: key);
 

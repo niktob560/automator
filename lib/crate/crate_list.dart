@@ -22,13 +22,12 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
         (already) => ApiService.getCrateRecords(offset: already, limit: 10),
         (context, elem) => _buildRow(elem),
         Center(
-            child: IconTextWidget(icon, 'There is no later records',
+            child: IconTextWidget(meta.icon, 'There is no later records',
                 iconColor: Colors.white, textSize: 48)));
   }
 
   @override
-  Widget build(BuildContext context) =>
-    new_build(context);
+  Widget build(BuildContext context) => new_build(context);
 
   Widget _buildRow(Record record) {
     final int hour = record.creationDate.hour % 24;
