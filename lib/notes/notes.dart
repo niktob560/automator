@@ -12,7 +12,10 @@ class NotesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => EndlessListStatefulWidget<Record>(
       (already) => ApiService.getNotesRecords(limit: 10, offset: already),
-      (context, elem) => _buildRow(elem));
+      (context, elem) => _buildRow(elem),
+      Center(
+          child: IconTextWidget(icon, 'There is no note records',
+              iconColor: Colors.white, textSize: 48)));
 
   Widget _buildRow(Record record) {
     final int hour = record.creationDate.hour % 24;
