@@ -1,31 +1,30 @@
 import 'package:automator/misc.dart';
 
 class Record {
-  String _note;
+  String note;
   DateTime _creationDate;
-  int _id;
+  int _id, _rootId;
 
-  Record(this._note, {creationDate, id}) {
+  Record(this.note, {creationDate, id, rootId}) {
     _creationDate = creationDate;
     _id = id;
+    _rootId = rootId;
   }
 
-  DateTime get creationDate => _creationDate;
-  String get note => _note;
-  int get id => _id;
+  get creationDate => _creationDate;
+  get id => _id;
+  get rootId => _rootId;
 
-  set note(String value) {
-    _note = value;
-  }
 
   @override
   String toString() {
-    return 'CrateRecord{_note: $_note, _creationDate: $_creationDate, _id: $_id}';
+    return 'Record{note: $note, _creationDate: $_creationDate, _id: $_id, _rootId: $_rootId}';
   }
 
   factory Record.fromJson(Map<String, dynamic> json) {
     return Record('${json['note']}',
         id: json['id'],
+        rootId: json['rootId'], //TODO: check token
         creationDate: serverDateFormat
             .parse(json['creation_date'])
             .add(DateTime.now().timeZoneOffset));
