@@ -34,7 +34,8 @@ class IconTextWidget extends StatelessWidget {
             style: TextStyle(
               color: textColor != null ? textColor : Colors.white,
               fontSize: (textSize != null ? textSize : 24) * 1.0,
-            ))
+            ),
+        textAlign: TextAlign.center)
       ],
     );
   }
