@@ -109,16 +109,16 @@ class _RootStatefulWidgetState extends State<RootStatefulWidget> {
               ),
               ListTile(
                 leading: Icon(
-                  Icons.av_timer,
+                  later.icon,
                   color: Colors.white60,
                 ),
                 title: Text(
-                  'Later',
+                  later.title,
                   style: TextStyle(color: Colors.white),
                 ),
                 onTap: () {
                   setState(() {
-                    mainWidget = later.LaterStatefulWidget();
+                    mainWidget = later.LaterWidget();
                   });
                   Navigator.pop(context);
                 },

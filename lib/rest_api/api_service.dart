@@ -201,6 +201,16 @@ class ApiService {
     return ret;
   }
 
+  static Future<Set<Record>> getLaterRecords({limit = 100, offset = 0}) async {
+    var b = await sendGet('${URLS.LATER}${URLS.GET_RECORDS}',
+        <String, String>{'limit': '$limit', 'offset': '$offset'});
+    Set<Record> ret = Set();
+    for (var i in b) {
+      ret.add(Record.fromJson(i));
+    }
+    return ret;
+  }
+
   static Future<Set<Record>> getNotesRecords({limit = 100, offset = 0}) async {
     var b = await sendGet('${URLS.NOTES}${URLS.GET_RECORDS}',
         <String, String>{'limit': '$limit', 'offset': '$offset'});
