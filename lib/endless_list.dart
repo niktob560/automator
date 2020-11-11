@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:automator/misc.dart';
 
-
 enum _State { idle, loading, failed, done }
 
 typedef _ElementBuilder<T> = Future<Set<T>> Function(int alreadyDisplayed);
@@ -112,8 +111,31 @@ class EndlessListStatefulWidgetState<T>
   }
 
   @override
-  Widget build(BuildContext context) =>
-      Container(child: _all.length != 0 ? _buildList() : _emptyWidget);
+  Widget build(BuildContext context) => Container(
+      child: _all.length != 0
+          ? _buildList()
+          : (_state == _State.done
+              ? Column(
+                  children: [
+                    _emptyWidget,
+                    Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(128),
+                        child: RaisedButton(
+                          child: Padding(
+                            child: Text(
+                              'Refresh',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 24),
+                            ),
+                            padding: EdgeInsets.all(16)
+                          ),
+                          color: Theme.of(context).accentColor,
+                          onPressed: _refresh,
+                        ))
+                  ],
+                )
+              : const SizedBox()));
 
   _buildList() => RefreshIndicator(
         key: _refreshIndicatorKey,
@@ -123,14 +145,15 @@ class EndlessListStatefulWidgetState<T>
             itemCount: _all.length + 1,
             physics: const AlwaysScrollableScrollPhysics(),
             itemBuilder: (context, i) {
-              if (i >= _all.length && _state != _State.loading && _state != _State.done) {
-                    () async {
+              if (i >= _all.length &&
+                  _state != _State.loading &&
+                  _state != _State.done) {
+                () async {
                   await sleep1();
                   _loadData();
                 }();
                 return _loaderWidget();
-              }
-              else
+              } else
                 return i < _all.length
                     ? _itemConstructor(context, _all[i])
                     : ((_state == _State.loading)
