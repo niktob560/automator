@@ -22,7 +22,7 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
         (already) => ApiService.getCrateRecords(offset: already, limit: 10),
         (context, elem) => _buildRow(elem),
         Center(
-            child: IconTextWidget(meta.icon, 'There is no later records',
+            child: IconTextWidget(meta.icon, 'There is no crate records',
                 iconColor: Colors.white, textSize: 48)));
   }
 
