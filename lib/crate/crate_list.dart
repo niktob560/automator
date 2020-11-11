@@ -6,6 +6,8 @@ import 'package:automator/day_night_gradients.dart';
 
 import 'package:automator/endless_list.dart';
 
+import 'crate.dart';
+
 //TODO: stateless
 class AllCrateStatefulWidget extends StatefulWidget {
   AllCrateStatefulWidget({Key key}) : super(key: key);
@@ -18,7 +20,10 @@ class AllCrateStatefulWidgetState extends State<AllCrateStatefulWidget> {
   Widget new_build(BuildContext context) {
     return EndlessListStatefulWidget<Record>(
         (already) => ApiService.getCrateRecords(offset: already, limit: 10),
-        (context, elem) => _buildRow(elem));
+        (context, elem) => _buildRow(elem),
+        Center(
+            child: IconTextWidget(icon, 'There is no later records',
+                iconColor: Colors.white, textSize: 48)));
   }
 
   @override

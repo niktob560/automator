@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:morpheus/morpheus.dart';
-
-import 'day_night_gradients.dart';
 
 import 'app.dart' as a;
 import 'calendar/calendar.dart' as calendar;
@@ -22,9 +19,7 @@ class RootStatefulWidget extends StatefulWidget {
 }
 
 class _RootStatefulWidgetState extends State<RootStatefulWidget> {
-  Widget mainWidget = _MainStatefulWidget();
-
-  Future<Widget> getFirstScreen() {}
+  Widget mainWidget = crate.Crate();
 
   int _selectedIndex = 0;
   static const TextStyle optionStyle =
@@ -59,18 +54,18 @@ class _RootStatefulWidgetState extends State<RootStatefulWidget> {
                   ),
                 ),
               ),
-              ListTile(
+              ListTile( //TODO: move to child
                 leading: Icon(
-                  Icons.add_box,
+                  crate.icon,
                   color: Colors.white60,
                 ),
                 title: Text(
-                  'Main',
+                  crate.title,
                   style: TextStyle(color: Colors.white),
                 ),
                 onTap: () {
                   setState(() {
-                    mainWidget = _MainStatefulWidget();
+                    mainWidget = crate.Crate();
                   });
                   Navigator.pop(context);
                 },
@@ -193,62 +188,6 @@ class _RootStatefulWidgetState extends State<RootStatefulWidget> {
         ),
       ),
       body: mainWidget,
-    );
-  }
-}
-
-class _MainStatefulWidget extends StatefulWidget {
-  _MainStatefulWidget({Key key}) : super(key: key);
-
-  @override
-  _MainStatefulWidgetState createState() => _MainStatefulWidgetState();
-}
-
-class _MainStatefulWidgetState extends State<_MainStatefulWidget> {
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).backgroundColor,
-      body: MorpheusTabView(
-        child: Padding(
-          child: Center(
-              child: [
-            crate.CrateAddStatefulWidget(),
-            crate.SortingStatefulWidget(),
-            crate.AllCrateStatefulWidget(),
-          ].elementAt(_selectedIndex)),
-          padding: EdgeInsets.zero,
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: dayNightGradient[6].colors[0],
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_box),
-            label: 'Crate',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.transfer_within_a_station),
-            label: 'Sorting',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'All',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Theme.of(context).backgroundColor,
-        onTap: _onItemTapped,
-      ),
     );
   }
 }
