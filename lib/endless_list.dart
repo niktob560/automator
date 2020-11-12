@@ -120,19 +120,18 @@ class EndlessListStatefulWidgetState<T>
                     _emptyWidget,
                     Container(
                         width: double.infinity,
-                        padding: EdgeInsets.all(128),
-                        child: RaisedButton(
+                        child: Center(
+                            child: RaisedButton(
                           child: Padding(
-                            child: Text(
-                              'Refresh',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 24),
-                            ),
-                            padding: EdgeInsets.all(16)
-                          ),
+                              child: Text(
+                                'Refresh',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 24),
+                              ),
+                              padding: EdgeInsets.all(16)),
                           color: Theme.of(context).accentColor,
                           onPressed: _refresh,
-                        ))
+                        )))
                   ],
                 )
               : const SizedBox()));
