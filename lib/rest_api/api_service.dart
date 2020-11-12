@@ -231,6 +231,25 @@ class ApiService {
     return ret;
   }
 
+  static Future<Set<AwaitRecord>> getAwaitRecords({limit = 100, offset = 0}) async {
+    var b = await sendGet('${URLS.AWAIT}${URLS.GET_RECORDS}',
+        <String, String>{'limit': '$limit', 'offset': '$offset'});
+    Set<AwaitRecord> ret = Set();
+    for (var i in b) {
+      print('AWAIT GET $i');
+      var r;
+      try {
+        r = AwaitRecord.fromJson(i);
+        print(r != null ? r.toString() : 'null');
+      }
+      catch (e) {
+        print('$e');
+      }
+      ret.add(r);
+    }
+    return ret;
+  }
+
   static Future<Record> getLastCrateRecords() async {
     var b = (await sendGet('${URLS.CRATE}${URLS.GET_RECORDS}',
         <String, String>{'limit': '1', 'offset': '0'}));
