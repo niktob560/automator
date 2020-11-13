@@ -1,5 +1,6 @@
 import 'package:automator/misc.dart';
 
+//TODO: make immutable
 class Record {
   String note;
   DateTime _creationDate;
@@ -25,7 +26,7 @@ class Record {
   factory Record.fromJson(Map<String, dynamic> json) {
     return Record('${json['note']}',
         id: json['id'],
-        rootId: json['root_id'], //TODO: check token
+        rootId: json['root_id'],
         creationDate: serverDateFormat
             .parse(json['creation_date'])
             .add(DateTime.now().timeZoneOffset));
@@ -40,12 +41,40 @@ class Record {
   int get hashCode => _id.hashCode;
 }
 
-class AwaitRecord extends Record {
-  String _executor;
+class DeadlinedRecord extends Record {
   DateTime _deadline;
 
-  AwaitRecord(note, this._executor, this._deadline, {creationDate, id, rootId})
+  DeadlinedRecord(note, this._deadline, {creationDate, id, rootId})
       : super(note, creationDate: creationDate, id: id, rootId: rootId);
+
+
+  factory DeadlinedRecord.fromJson(Map<String, dynamic> json) {
+    return DeadlinedRecord(
+        json['note'],
+        serverDateFormat
+            .parse(json['deadline'])
+            .add(DateTime.now().timeZoneOffset),
+        creationDate: serverDateFormat
+            .parse(json['creation_date'])
+            .add(DateTime.now().timeZoneOffset),
+        id: json['id'],
+        rootId: json['root_id']
+    );
+  }
+
+  @override
+  String toString() {
+    return 'DeadlinedRecord{_deadline: $_deadline, super: ${super.toString()}';
+  }
+
+  DateTime get deadline => _deadline;
+}
+
+class AwaitRecord extends DeadlinedRecord {
+  String _executor;
+
+  AwaitRecord(note, this._executor, deadline, {creationDate, id, rootId})
+      : super(note, deadline, creationDate: creationDate, id: id, rootId: rootId);
 
   factory AwaitRecord.fromJson(Map<String, dynamic> json) {
     return AwaitRecord(
@@ -58,16 +87,14 @@ class AwaitRecord extends Record {
             .parse(json['creation_date'])
             .add(DateTime.now().timeZoneOffset),
         id: json['id'],
-        rootId: json['root_id'] //TODO: check token
-        );
+        rootId: json['root_id']
+    );
   }
 
   @override
   String toString() {
-    return 'AwaitRecord{_executor: $_executor, _awaitTime: $_deadline, super: ${super.toString()}';
+    return 'AwaitRecord{_executor: $_executor, super: ${super.toString()}';
   }
-
-  DateTime get deadline => _deadline;
 
   String get executor => _executor;
 }

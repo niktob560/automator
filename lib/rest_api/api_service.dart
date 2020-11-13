@@ -221,7 +221,8 @@ class ApiService {
     return ret;
   }
 
-  static Future<Set<Record>> getCurrentRecords({limit = 100, offset = 0}) async {
+  static Future<Set<Record>> getCurrentRecords(
+      {limit = 100, offset = 0}) async {
     var b = await sendGet('${URLS.CURRENT}${URLS.GET_RECORDS}',
         <String, String>{'limit': '$limit', 'offset': '$offset'});
     Set<Record> ret = Set();
@@ -231,7 +232,8 @@ class ApiService {
     return ret;
   }
 
-  static Future<Set<AwaitRecord>> getAwaitRecords({limit = 100, offset = 0}) async {
+  static Future<Set<AwaitRecord>> getAwaitRecords(
+      {limit = 100, offset = 0}) async {
     var b = await sendGet('${URLS.AWAIT}${URLS.GET_RECORDS}',
         <String, String>{'limit': '$limit', 'offset': '$offset'});
     Set<AwaitRecord> ret = Set();
@@ -241,8 +243,26 @@ class ApiService {
       try {
         r = AwaitRecord.fromJson(i);
         print(r != null ? r.toString() : 'null');
+      } catch (e) {
+        print('$e');
       }
-      catch (e) {
+      ret.add(r);
+    }
+    return ret;
+  }
+
+  static Future<Set<DeadlinedRecord>> getCalendarRecords(
+      {limit = 100, offset = 0}) async {
+    var b = await sendGet('${URLS.CALENDAR}${URLS.GET_RECORDS}',
+        <String, String>{'limit': '$limit', 'offset': '$offset'});
+    Set<DeadlinedRecord> ret = Set();
+    for (var i in b) {
+      print('AWAIT GET $i');
+      var r;
+      try {
+        r = DeadlinedRecord.fromJson(i);
+        print(r != null ? r.toString() : 'null');
+      } catch (e) {
         print('$e');
       }
       ret.add(r);
