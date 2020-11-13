@@ -1,12 +1,13 @@
 import 'package:automator/misc.dart';
+import 'package:flutter/cupertino.dart';
 
-//TODO: make immutable
+@immutable
 class Record {
-  String note;
+  String _note;
   DateTime _creationDate;
   int _id, _rootId;
 
-  Record(this.note, {creationDate, id, rootId}) {
+  Record(this._note, {creationDate, id, rootId}) {
     _creationDate = creationDate;
     _id = id;
     _rootId = rootId;
@@ -17,6 +18,8 @@ class Record {
   get id => _id;
 
   get rootId => _rootId;
+
+  String get note => _note;
 
   @override
   String toString() {

@@ -62,7 +62,9 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
   TextEditingController _executorContr = TextEditingController();
 
   _setState(int newState) async {
-    (await _record).note = _contr.text;
+    var rec = await _record;
+    _record = (() async => Record(_contr.text, id: rec.id, creationDate: rec.creationDate))();
+    // (await _record).note = _contr.text;
     if (_contr.text.isEmpty) {
       setState(() {
         _noteErrorMessage = 'Can`t be empty';
