@@ -115,9 +115,10 @@ class EndlessListStatefulWidgetState<T>
       child: _all.length != 0
           ? _buildList()
           : (_state == _State.done
-              ? Column(
+              ? ListView(
                   children: [
                     _emptyWidget,
+                    const SizedBox(height: 32),
                     Container(
                         width: double.infinity,
                         child: Center(
