@@ -13,6 +13,12 @@ formatDateTimeForServer(DateTime dt) {
   return '${dt.year}-${dt.month}-${dt.day}T${dt.hour}:${dt.minute}:${dt.second}Z';
 }
 
+double getMaxIconSize(context) {
+  final maxSize = max(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height),
+      minSize = min(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
+  return minSize * min(minSize / maxSize, 0.8);
+}
+
 class IconTextWidget extends StatelessWidget {
   final IconData icon;
   final String text;
@@ -26,13 +32,11 @@ class IconTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxSize = max(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height),
-          minSize = min(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
     return Column(
       children: [
         Icon(
           icon,
-          size: minSize * min(minSize / maxSize, 0.8),
+          size: getMaxIconSize(context),
           color: iconColor != null ? iconColor : Theme.of(context).focusColor,
         ),
         Text(text,

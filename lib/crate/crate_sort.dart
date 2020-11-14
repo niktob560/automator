@@ -369,7 +369,7 @@ class SortingStatefulWidgetState extends State<SortingStatefulWidget> {
                     ),
                     Center(
                       child: Icon(Icons.double_arrow,
-                          size: MediaQuery.of(context).size.width * 0.8),
+                          size: getMaxIconSize(context)),
                     ),
                     Container(
                       width: double.infinity,
