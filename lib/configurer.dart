@@ -21,18 +21,17 @@ class _ConfigurerWidgetState extends State<ConfigurerWidget> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-          body: Container(
+      appBar: AppBar(
+          title: Center(
+              child: Text(
+        'Please, configure server settings',
+        style: TextStyle(
+            color: Colors.white, fontSize: 24, decoration: TextDecoration.none),
+        textAlign: TextAlign.center,
+      ))),
+      body: Container(
         decoration: BoxDecoration(color: Theme.of(context).backgroundColor),
         child: ListView(children: [
-          Center(
-              child: Text(
-            'Please, configure server settings',
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                decoration: TextDecoration.none),
-            textAlign: TextAlign.center,
-          )),
           const SizedBox(height: 32),
           TextField(
             decoration: getInputDecoration('Host', _hostError),
@@ -88,7 +87,7 @@ class _ConfigurerWidgetState extends State<ConfigurerWidget> {
 
                           try {
                             valid = await ApiService.login(token, host);
-                            if(valid)
+                            if (valid)
                               await PreferenceManager.auth(host, token);
                           } catch (e) {
                             print('$e');
