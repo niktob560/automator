@@ -8,7 +8,7 @@ import 'app.dart' as a;
 import 'calendar/calendar.dart' as calendar;
 import 'current/current.dart' as current;
 import 'later/later.dart' as later;
-import 'misc.dart';
+import 'meta.dart';
 import 'projects/projects.dart' as projects;
 import 'await/await.dart' as wait;
 import 'notes/notes.dart' as notes;
@@ -38,7 +38,7 @@ class RootStatefulWidget extends StatefulWidget {
 }
 
 class _RootStatefulWidgetState extends State<RootStatefulWidget> {
-  Widget _mainWidget = metas[0].content;
+  Meta _mainMeta = metas[0];
   bool _isAuthed;
   StreamSubscription<bool> _authSub;
 
@@ -113,14 +113,14 @@ class _RootStatefulWidgetState extends State<RootStatefulWidget> {
           style: TextStyle(color: Colors.white),
         ),
         onTap: () {
-          setState(() => _mainWidget = i.content);
+          setState(() => _mainMeta = i);
           Navigator.pop(context);
         },
       ));
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text(a.title),
+        title: Text(_mainMeta.title),
       ),
       drawer: Drawer(
         child: Container(
@@ -128,7 +128,7 @@ class _RootStatefulWidgetState extends State<RootStatefulWidget> {
           decoration: BoxDecoration(color: Theme.of(context).backgroundColor),
         ),
       ),
-      body: _mainWidget,
+      body: _mainMeta.content,
     );
   }
 }
