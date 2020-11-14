@@ -19,13 +19,13 @@ class CalendarWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              _getTextWidget(elem.note, textSize: 18),
+              _getTextWidget(elem.note, textSize: 18.0),
               _getTextWidget(
                   'Deadline: ${userDateTimeFormat.format(elem.deadline)}',
-                  textSize: 14,
+                  textSize: 14.0,
                   color: Colors.white),
               _getTextWidget(userDateTimeFormat.format(elem.creationDate),
-                  textSize: 12, color: Colors.white70),
+                  textSize: 12.0, color: Colors.white70),
               Divider()
             ],
           )),

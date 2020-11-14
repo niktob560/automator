@@ -3,17 +3,15 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:url_encoder/url_encoder.dart';
 
-import 'package:flutter/foundation.dart';
+import 'package:automator/prefs.dart';
 
 import 'models.dart';
 
 import 'package:automator/misc.dart' as misc;
 
 class URLS {
-  static const String BASE_URL = kReleaseMode
-          ? 'https://gtd-nobodyhomie.ddns.net/api'
-          : 'http://192.168.1.66:1234/api',
-      CRATE = '/crate',
+  static String baseUrl = PreferenceManager.host;
+  static const String CRATE = '/crate',
       ARCHIVE = '/archive',
       NOTES = '/notes',
       DONE = '/done',
@@ -36,7 +34,7 @@ class URLS {
 
 class ApiService {
   static Future<String> _expiringToken;
-  static String _longToken;
+  static String _longToken = PreferenceManager.token;
 
   static String urlQueryEncode(Map<String, String> queryParams) {
     String q = "";
@@ -49,8 +47,12 @@ class ApiService {
     return q;
   }
 
-  static Future<bool> login(String token) async {
-    final response = await http.post('${URLS.BASE_URL}/security/login',
+  static Future<bool> login(String token, [String host]) async {
+    if (host == null) {
+      print('Login host null, set to ${URLS.baseUrl}');
+      host = URLS.baseUrl;
+    }
+    final response = await http.post('$host/security/login',
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Access-Control-Allow-Origin': '*'
@@ -69,19 +71,30 @@ class ApiService {
     }
     print('Connected, $body');
     print('Connected, ${response.body}');
-    _longToken = token;
-    _expiringToken = (() async {
-      return '${body['token']}';
-    }());
-    return true;
+    final testResponse =
+        await http.get('$host/security/test', headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Access-Control-Allow-Origin': '*',
+      'Authorization': 'Bearer ${body['token']}'
+    });
+    print('${testResponse.body}');
+    if (testResponse.statusCode == 200) {
+      _longToken = token;
+      URLS.baseUrl = host;
+      _expiringToken = (() async {
+        return '${body['token']}';
+      }());
+      return true;
+    } else
+      return false;
   }
 
   static Future<dynamic> sendPost(url, bodyJson,
       {relogin = false, Map<String, String> queryParams}) async {
     print(
-        'POST ${URLS.BASE_URL}$url $bodyJson $queryParams ${await _expiringToken}');
+        'POST ${URLS.baseUrl}$url $bodyJson $queryParams ${await _expiringToken}');
     final response =
-        await http.post('${URLS.BASE_URL}$url?${urlQueryEncode(queryParams)}',
+        await http.post('${URLS.baseUrl}$url?${urlQueryEncode(queryParams)}',
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
               'Authorization': 'Bearer ${await _expiringToken}',
@@ -108,8 +121,8 @@ class ApiService {
   static Future<dynamic> sendPatch(url, bodyJson,
       {relogin = false, Map<String, dynamic> queryParams}) async {
     print(
-        'PATCH ${URLS.BASE_URL}$url $bodyJson $queryParams ${await _expiringToken}');
-    final uri = '${URLS.BASE_URL}$url?${urlQueryEncode(queryParams)}';
+        'PATCH ${URLS.baseUrl}$url $bodyJson $queryParams ${await _expiringToken}');
+    final uri = '${URLS.baseUrl}$url?${urlQueryEncode(queryParams)}';
     print(uri);
     final response = await http.patch(uri,
         headers: <String, String>{
@@ -139,9 +152,9 @@ class ApiService {
 
   static Future<dynamic> sendGet(String url, Map<String, String> args,
       {relogin = false}) async {
-    print('GET ${URLS.BASE_URL}$url $args ${await _expiringToken}');
+    print('GET ${URLS.baseUrl}$url $args ${await _expiringToken}');
     try {
-      var uri = '${URLS.BASE_URL}$url';
+      var uri = '${URLS.baseUrl}$url';
       uri = '$uri?${urlQueryEncode(args)}';
       print('uri: $uri');
       final response = await http.get(

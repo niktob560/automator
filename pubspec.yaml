@@ -29,6 +29,7 @@ dependencies:
   equatable: ^1.2.0
   morpheus: ^1.2.2+1
   url_encoder: ^0.0.3
+  shared_preferences: ^0.5.12+4
 
 
 

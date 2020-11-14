@@ -1,3 +1,4 @@
+import 'package:automator/prefs.dart';
 import 'package:flutter/material.dart';
 import 'day_night_gradients.dart';
 
@@ -9,6 +10,7 @@ const String title = 'Automat';
 class AutomatorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    PreferenceManager();
     final ThemeData td = ThemeData.dark().copyWith(
         accentColor: dayNightGradient[7].colors[0],
         primaryColor: dayNightGradient[6].colors[0],
