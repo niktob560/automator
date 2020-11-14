@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'day_night_gradients.dart';
 
 final DateFormat serverDateFormat = DateFormat("yyyy-MM-ddTHH:mm:ssZ"),
@@ -23,11 +26,13 @@ class IconTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final maxSize = max(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height),
+          minSize = min(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
     return Column(
       children: [
         Icon(
           icon,
-          size: MediaQuery.of(context).size.width * 0.8,
+          size: minSize * min(minSize / maxSize, 0.8),
           color: iconColor != null ? iconColor : Theme.of(context).focusColor,
         ),
         Text(text,
