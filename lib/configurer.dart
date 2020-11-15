@@ -20,61 +20,82 @@ class _ConfigurerWidgetState extends State<ConfigurerWidget> {
   TextEditingController _configController = TextEditingController();
   _State _state = _State.idle;
   static final _codec = utf8.fuse(base64);
+  bool _showConfigClear = false;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(
-          title: Center(
-              child: Text(
-        'Please, configure server settings',
-        style: TextStyle(
-            color: Colors.white, fontSize: 24, decoration: TextDecoration.none),
-        textAlign: TextAlign.center,
-      ))),
-      body: Container(
-        decoration: BoxDecoration(color: Theme.of(context).backgroundColor),
-        child: ListView(children: [
-          const SizedBox(height: 32),
-          TextField(
-            decoration: getInputDecoration('Config string', _configError),
-            controller: _configController,
-            maxLines: null,
-            keyboardType: TextInputType.multiline,
-            enabled: (_state != _State.loading),
-          ),
-          const SizedBox(height: 32),
-          (_state == _State.failed
-              ? Text('Failed to connect',
-                  style: TextStyle(color: Theme.of(context).errorColor))
-              : const SizedBox()),
-          const SizedBox(height: 32),
-          Center(
-              child: _state != _State.loading
-                  ? Column(
-                      children: [
-                        RaisedButton(
-                            child: Text('Done'),
-                            onPressed: () => _login(_configController.text)),
-                        const SizedBox(height: 16),
-                        RaisedButton(
-                            child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('Scan QR'),
-                                  const SizedBox(height: 8),
-                                  Icon(Icons.qr_code)
-                                ]),
-                            padding: EdgeInsets.all(8),
-                            onPressed: () async {
-                              final conf = await scanner.scan();
-                              _configController.text = conf;
-                              _login(conf);
-                            })
-                      ],
-                    )
-                  : const CircularProgressIndicator())
-        ], padding: EdgeInsets.all(16)),
-      ));
+  void initState() {
+    _configController.addListener(() {
+      var newBool = (_configController.text != null && _configController.text.isNotEmpty);
+      if (newBool != _showConfigClear)
+        setState(() {
+          _showConfigClear = newBool;
+        });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      Scaffold(
+          appBar: AppBar(
+              title: Center(
+                  child: Text(
+                    'Please, configure server settings',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        decoration: TextDecoration.none),
+                    textAlign: TextAlign.center,
+                  ))),
+          body: Container(
+            decoration: BoxDecoration(color: Theme
+                .of(context)
+                .backgroundColor),
+            child: ListView(children: [
+              const SizedBox(height: 32),
+              TextField(
+                decoration: getInputDecoration('Config string', _configError)
+                    .copyWith(suffixIcon: (_showConfigClear)? IconButton(icon: Icon(Icons.clear),
+                    onPressed: () => _configController.clear()) : const SizedBox()),
+                controller: _configController,
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                enabled: (_state != _State.loading),
+              ),
+              const SizedBox(height: 32),
+              (_state == _State.failed
+                  ? Text('Failed to connect',
+                  style: TextStyle(color: Theme
+                      .of(context)
+                      .errorColor))
+                  : const SizedBox()),
+              const SizedBox(height: 32),
+              Center(
+                  child: _state != _State.loading
+                      ? Column(
+                    children: [
+                      RaisedButton(
+                          child: Text('Done'),
+                          onPressed: () => _login(_configController.text)),
+                      const SizedBox(height: 16),
+                      RaisedButton(
+                          child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('Scan QR'),
+                                const SizedBox(height: 8),
+                                Icon(Icons.qr_code)
+                              ]),
+                          padding: EdgeInsets.all(8),
+                          onPressed: () async {
+                            final conf = await scanner.scan();
+                            _configController.text = conf;
+                            _login(conf);
+                          })
+                    ],
+                  )
+                      : const CircularProgressIndicator())
+            ], padding: EdgeInsets.all(16)),
+          ));
 
   _login(final String conf) async {
     setState(() {
@@ -96,7 +117,9 @@ class _ConfigurerWidgetState extends State<ConfigurerWidget> {
           host.isEmpty ||
           token == null ||
           token.isEmpty ||
-          !Uri.parse(host).isAbsolute) {
+          !Uri
+              .parse(host)
+              .isAbsolute) {
         //if invalid connection data provided
         setState(() {
           _configError = 'Invalid config';
