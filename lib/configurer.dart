@@ -1,6 +1,7 @@
+import 'dart:convert';
+
 import 'package:automator/prefs.dart';
 import 'package:automator/rest_api/api_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'misc.dart';
@@ -13,11 +14,10 @@ class ConfigurerWidget extends StatefulWidget {
 enum _State { idle, loading, failed }
 
 class _ConfigurerWidgetState extends State<ConfigurerWidget> {
-  String _hostError, _tokenError;
-  TextEditingController _hostController = TextEditingController(),
-      _tokenController = TextEditingController();
-
+  String _configError;
+  TextEditingController _configController = TextEditingController();
   _State _state = _State.idle;
+  static final _codec = utf8.fuse(base64);
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -34,16 +34,8 @@ class _ConfigurerWidgetState extends State<ConfigurerWidget> {
         child: ListView(children: [
           const SizedBox(height: 32),
           TextField(
-            decoration: getInputDecoration('Host', _hostError),
-            controller: _hostController,
-            maxLines: null,
-            keyboardType: TextInputType.multiline,
-            enabled: (_state != _State.loading),
-          ),
-          const SizedBox(height: 32),
-          TextField(
-            decoration: getInputDecoration('Token', _tokenError),
-            controller: _tokenController,
+            decoration: getInputDecoration('Config string', _configError),
+            controller: _configController,
             maxLines: null,
             keyboardType: TextInputType.multiline,
             enabled: (_state != _State.loading),
@@ -59,45 +51,54 @@ class _ConfigurerWidgetState extends State<ConfigurerWidget> {
                   ? RaisedButton(
                       child: Text('Done'),
                       onPressed: () async {
-                        var host = _hostController.text;
-                        var token = _tokenController.text;
                         setState(() {
-                          if (host == null || host.isEmpty)
-                            _hostError = 'Can`t be empty';
-                          else {
-                            bool valid;
-                            try {
-                              valid = Uri.parse(host).isAbsolute;
-                            } catch (e) {
-                              valid = false;
-                            }
-                            _hostError = valid ? null : 'Uri invalid';
-                          }
-                          if (token == null || token.isEmpty)
-                            _tokenError = 'Can`t be empty';
-                          else
-                            _tokenError = null;
+                          _configError = null;
+                          _state = _State.loading;
                         });
-                        if (_hostError == null && _tokenError == null) {
-                          setState(() {
-                            _state = _State.loading;
-                          });
-                          print('Trying to connect $host $token');
-                          bool valid;
-
-                          try {
-                            valid = await ApiService.login(token, host);
-                            if (valid)
-                              await PreferenceManager.auth(host, token);
-                          } catch (e) {
-                            print('$e');
-                            valid = false;
-                          }
-                          print('${valid ? 'success' : 'fail'}');
-                          if (!valid)
+                        try {
+                          final config =
+                              jsonDecode(_codec.decode(_configController.text));
+                          final String host = config['host'];
+                          final String token = config['token'];
+                          if (config == null || config.isEmpty) {
+                            //if no config provided
                             setState(() {
+                              _configError = 'Can`t be empty';
                               _state = _State.failed;
                             });
+                            return;
+                          } else if (host == null ||
+                              host.isEmpty ||
+                              token == null ||
+                              token.isEmpty ||
+                              !Uri.parse(host).isAbsolute) {
+                            //if invalid connection data provided
+                            setState(() {
+                              _configError = 'Invalid config';
+                              _state = _State.failed;
+                            });
+                            return;
+                          }
+                          else {
+                            //valid config
+                            if (await ApiService.login(token, host)) {
+                              await PreferenceManager.auth(host, token);
+                            }
+                            else {
+                              //invalid login
+                              setState(() {
+                                _configError = 'Invalid credentials';
+                                _state = _State.failed;
+                              });
+                            }
+                          }
+                        } catch (e) {
+                          //system error on some step
+                          setState(() {
+                            _configError = 'Invalid config format';
+                            _state = _State.failed;
+                          });
+                          return;
                         }
                       },
                     )

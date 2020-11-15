@@ -1,9 +1,21 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart';
 
 Future<void> init() async {}
+
+// class PreferenceConfigParser {
+//   static const TOKEN_KEY = 'token', HOST_KEY = 'host';
+//   static final _codec = utf8.fuse(base64);
+//   static decode(final String raw){
+//     return jsonDecode(_codec.decode(raw));
+//   }
+//
+//   static encode(final String token, final String host) {
+//     return _codec.encode(jsonEncode(<String, String>{TOKEN_KEY: token, HOST_KEY: host}));
+//   }
+// }
 
 class PreferenceManager {
   static const TOKEN_KEY = 'token', HOST_KEY = 'host';
