@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:ui';
+import 'dart:math';
 
 import 'package:automator/prefs.dart';
 import 'package:automator/rest_api/api_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:qrscan/qrscan.dart' as scanner;
@@ -22,10 +25,15 @@ class _ConfigurerWidgetState extends State<ConfigurerWidget> {
   static final _codec = utf8.fuse(base64);
   bool _showConfigClear = false;
 
+  static const _sigmaX = 2.0; // from 0-10
+  static const _sigmaY = 2.0; // from 0-10
+  static const _opacity = 0.1; // from 0-1.0
+
   @override
   void initState() {
     _configController.addListener(() {
-      var newBool = (_configController.text != null && _configController.text.isNotEmpty);
+      var newBool =
+          (_configController.text != null && _configController.text.isNotEmpty);
       if (newBool != _showConfigClear)
         setState(() {
           _showConfigClear = newBool;
@@ -34,68 +42,96 @@ class _ConfigurerWidgetState extends State<ConfigurerWidget> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      Scaffold(
-          appBar: AppBar(
-              title: Center(
-                  child: Text(
-                    'Please, configure server settings',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        decoration: TextDecoration.none),
-                    textAlign: TextAlign.center,
-                  ))),
-          body: Container(
-            decoration: BoxDecoration(color: Theme
-                .of(context)
-                .backgroundColor),
-            child: ListView(children: [
-              const SizedBox(height: 32),
-              TextField(
-                decoration: getInputDecoration('Config string', _configError)
-                    .copyWith(suffixIcon: (_showConfigClear)? IconButton(icon: Icon(Icons.clear),
-                    onPressed: () => _configController.clear()) : const SizedBox()),
-                controller: _configController,
-                maxLines: null,
-                keyboardType: TextInputType.multiline,
-                enabled: (_state != _State.loading),
-              ),
-              const SizedBox(height: 32),
-              (_state == _State.failed
-                  ? Text('Failed to connect',
-                  style: TextStyle(color: Theme
-                      .of(context)
-                      .errorColor))
-                  : const SizedBox()),
-              const SizedBox(height: 32),
-              Center(
-                  child: _state != _State.loading
-                      ? Column(
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(
+          title: Center(
+              child: Text(
+        'Please, configure server settings',
+        style: TextStyle(
+            color: Colors.white, fontSize: 24, decoration: TextDecoration.none),
+        textAlign: TextAlign.center,
+      ))),
+      body: Container(
+          decoration: BoxDecoration(color: Theme.of(context).backgroundColor),
+          child: Stack(
+            children: [
+              ListView(children: [
+                const SizedBox(height: 32),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    // mainAxisSize: MainAxisSize.max,
                     children: [
-                      RaisedButton(
-                          child: Text('Done'),
-                          onPressed: () => _login(_configController.text)),
-                      const SizedBox(height: 16),
-                      RaisedButton(
-                          child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('Scan QR'),
-                                const SizedBox(height: 8),
-                                Icon(Icons.qr_code)
-                              ]),
-                          padding: EdgeInsets.all(8),
-                          onPressed: () async {
-                            final conf = await scanner.scan();
-                            _configController.text = conf;
-                            _login(conf);
-                          })
-                    ],
-                  )
-                      : const CircularProgressIndicator())
-            ], padding: EdgeInsets.all(16)),
-          ));
+                      Container(
+                        child: IconButton(
+                            icon: Icon(Icons.qr_code),
+                            onPressed: () async {
+                              if (_state != _State.loading) {
+                                final conf = await scanner.scan();
+                                _configController.text = conf;
+                                _login(conf);
+                              }
+                            }),
+                        decoration: BoxDecoration(
+                            color: Theme.of(context).buttonColor,
+                            borderRadius: BorderRadius.all(Radius.circular(2))),
+                        alignment: Alignment.topCenter,
+                      ),
+                      const SizedBox(width: 16),
+                      Flexible(
+                          child: TextField(
+                        decoration:
+                            getInputDecoration('Config string', _configError)
+                                .copyWith(
+                                    suffixIcon: (_showConfigClear)
+                                        ? IconButton(
+                                            icon: Icon(Icons.clear),
+                                            onPressed: () {
+                                              _configController.clear();
+                                              setState(() {
+                                                _configError = null;
+                                              });
+                                            })
+                                        : const SizedBox()),
+                        controller: _configController,
+                        maxLines: null,
+                        keyboardType: TextInputType.multiline,
+                      )),
+                    ]),
+                const SizedBox(height: 32),
+                Center(
+                    child: RaisedButton(
+                        child: Text('Done'),
+                        onPressed: () => _login(_configController.text)))
+              ], padding: EdgeInsets.all(16)),
+              (_state == _State.loading)
+                  ? Container(
+                      // width: min(MediaQuery.of(context).size.height,
+                      //         MediaQuery.of(context).size.width) *
+                      //     0.5,
+                      // height: min(MediaQuery.of(context).size.height,
+                      //         MediaQuery.of(context).size.width) *
+                      //     0.5,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(8))),
+                      child: BackdropFilter(
+                        filter:
+                            ImageFilter.blur(sigmaX: _sigmaX, sigmaY: _sigmaY),
+                        child: Center(
+                            child: Container(
+                          width: min(MediaQuery.of(context).size.height,
+                                  MediaQuery.of(context).size.width) *
+                              0.5,
+                          height: min(MediaQuery.of(context).size.height,
+                                  MediaQuery.of(context).size.width) *
+                              0.5,
+                          // color: Colors.black.withOpacity(_opacity),
+                          child: CircularProgressIndicator(),
+                        )),
+                      ))
+                  : const SizedBox()
+            ],
+          )));
 
   _login(final String conf) async {
     setState(() {
@@ -117,9 +153,7 @@ class _ConfigurerWidgetState extends State<ConfigurerWidget> {
           host.isEmpty ||
           token == null ||
           token.isEmpty ||
-          !Uri
-              .parse(host)
-              .isAbsolute) {
+          !Uri.parse(host).isAbsolute) {
         //if invalid connection data provided
         setState(() {
           _configError = 'Invalid config';
