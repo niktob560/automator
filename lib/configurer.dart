@@ -4,6 +4,8 @@ import 'package:automator/prefs.dart';
 import 'package:automator/rest_api/api_service.dart';
 import 'package:flutter/material.dart';
 
+import 'package:qrscan/qrscan.dart' as scanner;
+
 import 'misc.dart';
 
 class ConfigurerWidget extends StatefulWidget {
@@ -48,61 +50,78 @@ class _ConfigurerWidgetState extends State<ConfigurerWidget> {
           const SizedBox(height: 32),
           Center(
               child: _state != _State.loading
-                  ? RaisedButton(
-                      child: Text('Done'),
-                      onPressed: () async {
-                        setState(() {
-                          _configError = null;
-                          _state = _State.loading;
-                        });
-                        try {
-                          final config =
-                              jsonDecode(_codec.decode(_configController.text));
-                          final String host = config['host'];
-                          final String token = config['token'];
-                          if (config == null || config.isEmpty) {
-                            //if no config provided
-                            setState(() {
-                              _configError = 'Can`t be empty';
-                              _state = _State.failed;
-                            });
-                            return;
-                          } else if (host == null ||
-                              host.isEmpty ||
-                              token == null ||
-                              token.isEmpty ||
-                              !Uri.parse(host).isAbsolute) {
-                            //if invalid connection data provided
-                            setState(() {
-                              _configError = 'Invalid config';
-                              _state = _State.failed;
-                            });
-                            return;
-                          }
-                          else {
-                            //valid config
-                            if (await ApiService.login(token, host)) {
-                              await PreferenceManager.auth(host, token);
-                            }
-                            else {
-                              //invalid login
-                              setState(() {
-                                _configError = 'Invalid credentials';
-                                _state = _State.failed;
-                              });
-                            }
-                          }
-                        } catch (e) {
-                          //system error on some step
-                          setState(() {
-                            _configError = 'Invalid config format';
-                            _state = _State.failed;
-                          });
-                          return;
-                        }
-                      },
+                  ? Column(
+                      children: [
+                        RaisedButton(
+                            child: Text('Done'),
+                            onPressed: () => _login(_configController.text)),
+                        const SizedBox(height: 16),
+                        RaisedButton(
+                            child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('Scan QR'),
+                                  const SizedBox(height: 8),
+                                  Icon(Icons.qr_code)
+                                ]),
+                            padding: EdgeInsets.all(8),
+                            onPressed: () async {
+                              final conf = await scanner.scan();
+                              _configController.text = conf;
+                              _login(conf);
+                            })
+                      ],
                     )
                   : const CircularProgressIndicator())
         ], padding: EdgeInsets.all(16)),
       ));
+
+  _login(final String conf) async {
+    setState(() {
+      _configError = null;
+      _state = _State.loading;
+    });
+    try {
+      final config = jsonDecode(_codec.decode(conf));
+      final String host = config['host'];
+      final String token = config['token'];
+      if (config == null || config.isEmpty) {
+        //if no config provided
+        setState(() {
+          _configError = 'Can`t be empty';
+          _state = _State.failed;
+        });
+        return;
+      } else if (host == null ||
+          host.isEmpty ||
+          token == null ||
+          token.isEmpty ||
+          !Uri.parse(host).isAbsolute) {
+        //if invalid connection data provided
+        setState(() {
+          _configError = 'Invalid config';
+          _state = _State.failed;
+        });
+        return;
+      } else {
+        //valid config
+        if (await ApiService.login(token, host)) {
+          await PreferenceManager.auth(host, token);
+        } else {
+          //invalid login
+          setState(() {
+            _configError = 'Invalid credentials';
+            _state = _State.failed;
+          });
+        }
+      }
+    } catch (e) {
+      //system error on some step
+      setState(() {
+        _configError = 'Invalid config format';
+        _state = _State.failed;
+      });
+      return;
+    }
+  }
 }
