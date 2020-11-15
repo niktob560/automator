@@ -33,62 +33,64 @@ class CrateAddStatefulWidgetState extends State<CrateAddStatefulWidget> {
         controller: _controller,
       ),
       const SizedBox(height: 16),
-      RaisedButton(
-        color: Theme.of(context).accentColor,
-        child: Text(
-          'Add',
-          style: TextStyle(color: Colors.white),
-        ),
-        onPressed: () async {
-          () async {
-            var valid = true;
-            var message;
-            try {
-              setState(() {
-                if (_controller.text.isEmpty) {
-                  _textFieldError = 'Can`t be empty';
-                  valid = false;
-                } else if (_controller.text.length < 4) {
-                  _textFieldError = 'Must contain at least 4 chars';
-                  valid = false;
-                } else {
-                  _textFieldError = null;
-                }
-              });
-              if (!valid) return;
-              setState(() {
-                _progressBarActive = true;
-              });
-              var r = await ApiService.postCrate(_controller.text);
-              if (r != null) {
-                if (r) {
-                  //success
-                  message = 'Successfuly created';
-                  _controller.text = '';
-                } else {
-                  //what?
-                  message = 'An error occured';
-                }
-              } else {
-                //no connection
-                print('Query returned null');
-                message = 'No connection to the server';
-              }
-            } catch (e) {
-              print('$e');
-              message = 'No connection to the server';
-            }
-            setState(() {
-              _progressBarActive = false;
-            });
-            final snackBar = SnackBar(
-              content: Text(message),
-              behavior: SnackBarBehavior.floating,
-            );
-            Scaffold.of(context).showSnackBar(snackBar);
-          }();
-        },
-      ),
+      (_progressBarActive)
+          ? const SizedBox()
+          : RaisedButton(
+              color: Theme.of(context).accentColor,
+              child: Text(
+                'Add',
+                style: TextStyle(color: Colors.white),
+              ),
+              onPressed: () async {
+                () async {
+                  var valid = true;
+                  var message;
+                  try {
+                    setState(() {
+                      if (_controller.text.isEmpty) {
+                        _textFieldError = 'Can`t be empty';
+                        valid = false;
+                      } else if (_controller.text.length < 4) {
+                        _textFieldError = 'Must contain at least 4 chars';
+                        valid = false;
+                      } else {
+                        _textFieldError = null;
+                      }
+                    });
+                    if (!valid) return;
+                    setState(() {
+                      _progressBarActive = true;
+                    });
+                    var r = await ApiService.postCrate(_controller.text);
+                    if (r != null) {
+                      if (r) {
+                        //success
+                        message = 'Successfuly created';
+                        _controller.text = '';
+                      } else {
+                        //what?
+                        message = 'An error occured';
+                      }
+                    } else {
+                      //no connection
+                      print('Query returned null');
+                      message = 'No connection to the server';
+                    }
+                  } catch (e) {
+                    print('$e');
+                    message = 'No connection to the server';
+                  }
+                  setState(() {
+                    _progressBarActive = false;
+                  });
+                  final snackBar = SnackBar(
+                    content: Text(message),
+                    behavior: SnackBarBehavior.floating,
+                  );
+                  Scaffold.of(context).showSnackBar(snackBar);
+                }();
+              },
+            ),
       Center(
         child: _progressBarActive == true
             ? const CircularProgressIndicator()
